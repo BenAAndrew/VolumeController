@@ -1,5 +1,6 @@
 import os
 from icoextract import IconExtractor
+from PIL import Image
 
 
 ICONS_FOLDER = "icons"
@@ -11,11 +12,15 @@ class AudioApplication:
         self.session = session
         self.id = self.session.Process.pid
         self.name = self.session.Process.name().split(".")[0]
-        self.icon = os.path.join(ICONS_FOLDER, self.name + ".png")
-        if not os.path.isfile(self.icon):
+        icon_path = os.path.join(ICONS_FOLDER, self.name + ".png")
+        if not os.path.isfile(icon_path):
             path = self.session.Process.cmdline()[0]
             extractor = IconExtractor(path)
-            extractor.export_icon(self.icon)
+            extractor.export_icon(icon_path)
+            self.icon = Image.open(icon_path).resize((32, 32), Image.ANTIALIAS)
+            self.icon.save(icon_path)
+        else:
+            self.icon = Image.open(icon_path)
 
     def get_volume(self):
         return self.session.SimpleAudioVolume.GetMasterVolume()

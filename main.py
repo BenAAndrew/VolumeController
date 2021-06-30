@@ -7,22 +7,23 @@ from PIL import Image, ImageTk
 from utils import get_apps, get_master_volume
 
 UPDATE_DELAY = 10
-ICON = "icon.ico"
+ICON_PATH = "icon.ico"
 if not hasattr(sys, "frozen"):
-    ICON = os.path.join(os.path.dirname(__file__), ICON)
+    ICON_PATH = os.path.join(os.path.dirname(__file__), ICON_PATH)
 else:
-    ICON = os.path.join(sys.prefix, ICON)
+    ICON_PATH = os.path.join(sys.prefix, ICON_PATH)
+ICON = Image.open(ICON_PATH)
 
 window = Tk()
 window.title("Audio Controller")
-window.iconbitmap(ICON)
+window.iconbitmap(ICON_PATH)
 window.resizable(0, 0)
 rows = []
 
 
 class AppRow:
-    def __init__(self, index, image_path, volume):
-        img = ImageTk.PhotoImage(Image.open(image_path).resize((32, 32), Image.ANTIALIAS))
+    def __init__(self, index, image, volume):
+        img = ImageTk.PhotoImage(image)
         icon = Label(image=img)
         icon.image = img
         icon.grid(row=index, column=0, padx=5, pady=5)
