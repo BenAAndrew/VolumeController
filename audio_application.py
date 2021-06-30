@@ -5,7 +5,7 @@ from PIL import Image
 
 ICONS_FOLDER = "icons"
 os.makedirs(ICONS_FOLDER, exist_ok=True)
-ICON_PATH = os.path.join(os.path.dirname(__file__), "icon.ico")
+ICON_PATH = "icon.ico"
 ICON = Image.open(ICON_PATH)
 
 
