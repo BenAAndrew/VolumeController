@@ -1,18 +1,12 @@
 import os
-import sys
 from tkinter import Tk, Label
 from tkinter.ttk import Progressbar
 from PIL import Image, ImageTk
 
 from utils import get_apps, get_master_volume
+from audio_application import ICON, ICON_PATH
 
 UPDATE_DELAY = 10
-ICON_PATH = "icon.ico"
-if not hasattr(sys, "frozen"):
-    ICON_PATH = os.path.join(os.path.dirname(__file__), ICON_PATH)
-else:
-    ICON_PATH = os.path.join(sys.prefix, ICON_PATH)
-ICON = Image.open(ICON_PATH)
 
 window = Tk()
 window.title("Audio Controller")
@@ -69,5 +63,5 @@ def update():
     window.after(UPDATE_DELAY, update)
 
 
-window.after(UPDATE_DELAY, update)
+update()
 window.mainloop()
