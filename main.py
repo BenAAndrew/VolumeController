@@ -40,19 +40,19 @@ def redraw_apps(apps):
     global rows
     rows = []
     master_volume = get_master_volume()
-    rows.append(AppRow(0, ICON, int(master_volume * 100)))
+    rows.append(AppRow(0, ICON, round(master_volume * 100)))
 
     for i in range(len(apps)):
-        rows.append(AppRow(i + 1, apps[i].icon, int(apps[i].get_volume() * master_volume * 100)))
+        rows.append(AppRow(i + 1, apps[i].icon, round(apps[i].get_volume() * master_volume * 100)))
 
 
 def update_volumes(apps):
     global rows
     master_volume = get_master_volume()
-    rows[0].update(int(master_volume * 100))
+    rows[0].update(round(master_volume * 100))
 
     for i in range(len(apps)):
-        rows[i + 1].update(int(apps[i].get_volume() * master_volume * 100))
+        rows[i + 1].update(round(apps[i].get_volume() * master_volume * 100))
 
 
 def update():
