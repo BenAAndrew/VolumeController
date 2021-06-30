@@ -27,9 +27,9 @@ class AppRow:
         icon = Label(image=img)
         icon.image = img
         icon.grid(row=index, column=0, padx=5, pady=5)
-        self.vol_bar = Progressbar(length=200, value=volume * 100, mode="determinate")
+        self.vol_bar = Progressbar(length=200, value=volume, mode="determinate")
         self.vol_bar.grid(row=index, column=1, padx=5, pady=5)
-        self.vol_label = Label(text="{:.2f}".format(volume))
+        self.vol_label = Label(text=volume)
         self.vol_label.grid(row=index, column=2, padx=5, pady=5)
 
     def update(self, volume):
