@@ -6,7 +6,7 @@ shortcut_table = [
         "StartMenuFolder",  # Directory_
         "Volume Controller",  # Name
         "TARGETDIR",  # Component_
-        "[TARGETDIR]main.exe",  # Target
+        "[TARGETDIR]VolumeController.exe",  # Target
         None,  # Arguments
         None,  # Description
         None,  # Hotkey
@@ -25,5 +25,5 @@ setup(
         "build_exe": {"include_files": ["icon.ico"]},
         "bdist_msi": {"data": {"Shortcut": shortcut_table}, "summary_data": {"author": "Ben Andrew"}},
     },
-    executables=[Executable("main.py", base="Win32GUI", icon="icon.ico")],
+    executables=[Executable("main.py", targetName="VolumeController.exe", base="Win32GUI", icon="icon.ico")],
 )

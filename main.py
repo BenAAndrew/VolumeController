@@ -1,7 +1,6 @@
-import os
 from tkinter import Tk, Label
 from tkinter.ttk import Progressbar
-from PIL import Image, ImageTk
+from PIL.ImageTk import PhotoImage
 
 from utils import get_apps, get_master_volume
 from audio_application import ICON, ICON_PATH
@@ -17,7 +16,7 @@ rows = []
 
 class AppRow:
     def __init__(self, index, image, volume):
-        img = ImageTk.PhotoImage(image)
+        img = PhotoImage(image)
         icon = Label(image=img)
         icon.image = img
         icon.grid(row=index, column=0, padx=5, pady=5)
@@ -52,13 +51,16 @@ def update_volumes(apps):
 
 def update():
     global rows
-    apps = get_apps()
 
-    # Only redraw all rows if an app open/closes, otherwise just update volumes
-    if len(apps) != len(rows) - 1:
-        redraw_apps(apps)
-    else:
-        update_volumes(apps)
+    # Check if app is minimised
+    if window.winfo_ismapped():
+        apps = get_apps()
+
+        # Only redraw all rows if an app open/closes, otherwise just update volumes
+        if len(apps) != len(rows) - 1:
+            redraw_apps(apps)
+        else:
+            update_volumes(apps)
 
     window.after(UPDATE_DELAY, update)
 
