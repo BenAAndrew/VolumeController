@@ -10,6 +10,7 @@ from PIL import Image
 ICONS_FOLDER = "icons"
 os.makedirs(ICONS_FOLDER, exist_ok=True)
 ICON_PATH = "icon.ico"
+ICON_BITMAP_PATH = "icon.bmp"
 ICON = Image.open(ICON_PATH)
 ICON_SIZE = 48
 
@@ -36,14 +37,17 @@ class AppRow:
 
 
 class AudioApplication:
-    def __init__(self, index, session, master_volume):
+    def __init__(self, index, session, master_volume, controller):
         self.index = index
         if session:
             self.session = session
             self.id = self.session.Process.pid
             self.name = self.session.Process.name().split(".")[0]
         self._get_icon()
-        self.app_row = AppRow(index, self.icon, self.get_volume(master_volume))
+        volume = self.get_volume(master_volume)
+        self.app_row = AppRow(index, self.icon, volume)
+        controller.send_icon(index, self.bitmap_path)
+        controller.send_volume(index, volume)
 
     def _get_icon(self):
         icon_path = os.path.join(ICONS_FOLDER, self.name + ".png")
@@ -64,9 +68,10 @@ class AudioApplication:
     def get_volume(self, master_volume):
         return round(self.session.SimpleAudioVolume.GetMasterVolume() * master_volume * 100)
 
-    def update(self, master_volume):
+    def update(self, master_volume, controller):
         volume = self.get_volume(master_volume)
         self.app_row.update(volume)
+        controller.send_volume(self.index, volume)
 
     def set_volume(self, volume):
         self.session.SimpleAudioVolume.SetMasterVolume(volume, None)
@@ -76,12 +81,13 @@ class AudioApplication:
 
 
 class MasterAudioApplication(AudioApplication):
-    def __init__(self, index, master_volume):
+    def __init__(self, index, master_volume, controller):
         self.id = 0
-        super().__init__(index, None, master_volume)
+        super().__init__(index, None, master_volume, controller)
     
     def _get_icon(self):
         self.icon = ICON
+        self.bitmap_path = ICON_BITMAP_PATH
 
     def get_volume(self, master_volume):
         return round(master_volume * 100)
