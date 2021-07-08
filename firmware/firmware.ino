@@ -44,7 +44,7 @@ void setup() {
   pinMode(encoder1Btn, INPUT_PULLUP);
   encoder1Prev = digitalRead(encoder1A);
   
-  Serial.begin(9600);
+  Serial.begin(19200);
 }
 
 void loop() {

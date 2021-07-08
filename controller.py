@@ -9,7 +9,7 @@ class AudioController:
     def __init__(self):
         for i in range(2, 10):
             try:
-                self.serial = serial.Serial(f"COM{i}", 9600, timeout=1)
+                self.serial = serial.Serial(f"COM{i}", 19200, timeout=1)
                 time.sleep(5)
                 break
             except:
