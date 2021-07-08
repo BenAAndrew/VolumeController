@@ -12,7 +12,7 @@ from PIL import Image
 ICONS_FOLDER = "icons"
 os.makedirs(ICONS_FOLDER, exist_ok=True)
 ICON_PATH = "icon.ico"
-ICON_BITMAP_PATH = "icon.bmp"
+SIMPLE_ICON_PATH = "icon.png"
 ICON = Image.open(ICON_PATH)
 ICON_SIZE = 48
 
@@ -48,12 +48,12 @@ class AudioApplication:
         self._get_icon()
         self.volume = self.get_volume(master_volume)
         self.app_row = AppRow(index, self.icon, self.volume)
-        controller.send_icon(index, self.bitmap_path)
+        controller.send_icon(index, self.simple_icon_path)
         controller.send_volume(index, self.volume)
 
     def _get_icon(self):
         icon_path = os.path.join(ICONS_FOLDER, self.name + ".png")
-        self.bitmap_path = os.path.join(ICONS_FOLDER, self.name + ".bmp")
+        self.simple_icon_path = os.path.join(ICONS_FOLDER, self.name + "-simple.png")
         if not os.path.isfile(icon_path):
             path = self.session.Process.exe()
             try:
@@ -61,7 +61,7 @@ class AudioApplication:
                 extractor.export_icon(icon_path)
                 self.icon = Image.open(icon_path).resize((ICON_SIZE, ICON_SIZE), Image.ANTIALIAS)
                 self.icon.save(icon_path)
-                self.icon.save(self.bitmap_path)
+                self.icon.quantize(32).save(self.simple_icon_path)
             except Exception:
                 self.icon = ICON
         else:
@@ -104,7 +104,7 @@ class MasterAudioApplication(AudioApplication):
     
     def _get_icon(self):
         self.icon = ICON
-        self.bitmap_path = ICON_BITMAP_PATH
+        self.simple_icon_path = SIMPLE_ICON_PATH
 
     def get_volume(self, volume=None):
         if volume:

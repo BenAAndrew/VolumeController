@@ -22,8 +22,9 @@ class AudioController:
         self.serial.write(b'i')
         self.serial.write(bytes([position]))
         image = imageio.imread(icon_path)
-        for row in image:
-            self.serial.write(bytes(row))
+        pixels = [tuple(p[:3]) if p[3] >= 250 else (0,0,0) for row in image for p in row]
+        for pixel in pixels:
+             self.serial.write(bytes(pixel))
         while not self.is_done():
             pass
 
