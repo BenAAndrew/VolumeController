@@ -9,10 +9,10 @@
 #define dc   8
 #define rst  5
 
-#define icon_size 48
-#define icon_area 2304
-#define margin_x 8
-#define margin_y 16
+#define icon_size 60
+#define icon_area icon_size*icon_size
+#define margin_x 2
+#define margin_y 10
 
 // Encoders
 #define stepSize 2

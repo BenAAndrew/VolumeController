@@ -14,7 +14,8 @@ os.makedirs(ICONS_FOLDER, exist_ok=True)
 ICON_PATH = "icon.ico"
 SIMPLE_ICON_PATH = "icon.png"
 ICON = Image.open(ICON_PATH)
-ICON_SIZE = 48
+ICON_SIZE = 60
+MAX_COLOURS = 30
 
 
 class AppRow:
@@ -61,7 +62,7 @@ class AudioApplication:
                 extractor.export_icon(icon_path)
                 self.icon = Image.open(icon_path).resize((ICON_SIZE, ICON_SIZE), Image.ANTIALIAS)
                 self.icon.save(icon_path)
-                self.icon.quantize(32).save(self.simple_icon_path)
+                self.icon.quantize(MAX_COLOURS).save(self.simple_icon_path)
             except Exception:
                 self.icon = ICON
         else:
