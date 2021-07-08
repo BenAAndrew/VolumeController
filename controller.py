@@ -20,11 +20,17 @@ class AudioController:
 
     def send_icon(self, position, icon_path):
         self.serial.write(b'i')
-        self.serial.write(bytes([position]))
         image = imageio.imread(icon_path)
         pixels = [tuple(p[:3]) if p[3] >= 250 else (0,0,0) for row in image for p in row]
+        colours = list(set(pixels))
+        self.serial.write(bytes([position, len(colours)]))
+
+        for colour in colours:
+            self.serial.write(bytes(colour))
+
         for pixel in pixels:
-             self.serial.write(bytes(pixel))
+            self.serial.write(bytes([colours.index(pixel)]))
+
         while not self.is_done():
             pass
 

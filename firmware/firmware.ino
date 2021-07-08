@@ -125,12 +125,22 @@ void drawIcon(){
   uint8_t x = getXPosition(pos);
   uint8_t y = getYPosition(pos);
   uint8_t starting_x = x;
-  int counter = 0;
-  for(; counter < icon_area; counter++){
+
+  // Colours
+  uint8_t num_colours = getNextInput();
+  int colours[num_colours];
+  for(uint8_t i = 0; i < num_colours; i++){
     r = getNextInput();
     g = getNextInput();
     b = getNextInput();
-    tft.drawPixel(x, y, tft.Color565(r,g,b));
+    colours[i] = tft.Color565(r,g,b);
+  }
+
+  // Drawing
+  uint8_t index;
+  for(int pixel_counter = 0; pixel_counter < icon_area; pixel_counter++){
+    index = getNextInput();
+    tft.drawPixel(x, y, colours[index]);
     if(x == icon_size-1+starting_x){
       x = starting_x;
       y++;
