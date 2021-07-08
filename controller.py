@@ -4,13 +4,15 @@ import imageio
 
 VOLUME_STEP = 0.02
 MINIMUM_OPACITY = 200
+BAUDRATE = 19200
+TIMEOUT = 0.1
 
 
 class AudioController:
     def __init__(self):
         for i in range(2, 10):
             try:
-                self.serial = serial.Serial(f"COM{i}", 19200, timeout=1)
+                self.serial = serial.Serial(f"COM{i}", BAUDRATE, timeout=TIMEOUT)
                 time.sleep(5)
                 break
             except:
