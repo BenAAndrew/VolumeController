@@ -1,6 +1,6 @@
 from tkinter import Tk
+from pycaw.pycaw import AudioUtilities
 
-from utils import get_sessions, get_master_volume
 from audio_application import ICON_PATH, AudioApplication, MasterAudioApplication
 from controller import AudioController
 
@@ -12,15 +12,16 @@ window.iconbitmap(ICON_PATH)
 window.resizable(0, 0)
 
 controller = AudioController()
-master_audio_app = MasterAudioApplication(0, get_master_volume(), controller)
+master_audio = MasterAudioApplication(controller)
 apps = []
+
 
 def update():
     global apps
 
     # window.winfo_ismapped()
-    master_volume = get_master_volume()
-    sessions = get_sessions()
+    master_volume = master_audio.get_volume()
+    sessions = [session for session in AudioUtilities.GetAllSessions() if session.Process]
 
     # New app(s)
     if len(sessions) > len(apps):
@@ -37,8 +38,11 @@ def update():
                 app.delete()
                 apps.pop(i)
 
+    # Update controller
+    controller.update(master_audio, apps)
+
     # Update apps
-    master_audio_app.update(master_volume, controller)
+    master_audio.update(master_volume, controller)
     for app in apps:
         app.update(master_volume, controller)
 

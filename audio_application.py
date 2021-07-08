@@ -1,4 +1,6 @@
-from controller import AudioController
+from ctypes import cast, POINTER
+from comtypes import CLSCTX_ALL
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from tkinter import Label
 from tkinter.ttk import Progressbar
 from PIL.ImageTk import PhotoImage
@@ -44,10 +46,10 @@ class AudioApplication:
             self.id = self.session.Process.pid
             self.name = self.session.Process.name().split(".")[0]
         self._get_icon()
-        volume = self.get_volume(master_volume)
-        self.app_row = AppRow(index, self.icon, volume)
+        self.volume = self.get_volume(master_volume)
+        self.app_row = AppRow(index, self.icon, self.volume)
         controller.send_icon(index, self.bitmap_path)
-        controller.send_volume(index, volume)
+        controller.send_volume(index, self.volume)
 
     def _get_icon(self):
         icon_path = os.path.join(ICONS_FOLDER, self.name + ".png")
@@ -66,31 +68,52 @@ class AudioApplication:
             self.icon = Image.open(icon_path)
 
     def get_volume(self, master_volume):
-        return round(self.session.SimpleAudioVolume.GetMasterVolume() * master_volume * 100)
+        return round(self.get_volume_percentage() * master_volume)
+
+    def get_volume_percentage(self):
+        return self.session.SimpleAudioVolume.GetMasterVolume()
 
     def update(self, master_volume, controller):
         volume = self.get_volume(master_volume)
-        self.app_row.update(volume)
-        controller.send_volume(self.index, volume)
+        if volume != self.volume:
+            self.app_row.update(volume)
+            controller.send_volume(self.index, volume)
+            self.volume = volume
 
     def set_volume(self, volume):
         self.session.SimpleAudioVolume.SetMasterVolume(volume, None)
+
+    def change_volume(self, change):
+        new_volume = self.get_volume_percentage() + change
+        if new_volume >= 0 and new_volume <= 1:
+            self.set_volume(new_volume)
 
     def delete(self):
         self.app_row.delete()
 
 
 class MasterAudioApplication(AudioApplication):
-    def __init__(self, index, master_volume, controller):
+    devices = AudioUtilities.GetSpeakers()
+    interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+    master_volume = cast(interface, POINTER(IAudioEndpointVolume))
+
+    def __init__(self, controller):
         self.id = 0
-        super().__init__(index, None, master_volume, controller)
+        volume = self.get_volume()
+        super().__init__(0, None, volume, controller)
     
     def _get_icon(self):
         self.icon = ICON
         self.bitmap_path = ICON_BITMAP_PATH
 
-    def get_volume(self, master_volume):
-        return round(master_volume * 100)
+    def get_volume(self, volume=None):
+        if volume:
+            return volume
+        else:
+            return round(self.get_volume_percentage() * 100)
+
+    def get_volume_percentage(self):
+        return self.master_volume.GetMasterVolumeLevelScalar() 
 
     def set_volume(self, volume):
-        pass
+        self.master_volume.SetMasterVolumeLevelScalar(volume, None)
