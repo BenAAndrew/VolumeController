@@ -19,19 +19,23 @@ MAX_COLOURS = 30
 
 
 class AppRow:
-    def __init__(self, index, image, volume):
+    def __init__(self, index, image, volume, muted):
         img = PhotoImage(image)
         self.icon = Label(image=img)
         self.icon.image = img
         self.icon.grid(row=index, column=0, padx=5, pady=5)
-        self.vol_bar = Progressbar(length=200, value=volume, mode="determinate")
+        self.vol_bar = Progressbar(length=200, value=0 if muted else volume, mode="determinate")
         self.vol_bar.grid(row=index, column=1, padx=5, pady=5)
-        self.vol_label = Label(text=volume)
+        self.vol_label = Label(text="🔇" if muted else volume, font=('Helvetica bold',14))
         self.vol_label.grid(row=index, column=2, padx=5, pady=5)
 
-    def update(self, volume):
+    def set_volume(self, volume):
         self.vol_bar["value"] = volume
         self.vol_label["text"] = volume
+
+    def set_mute(self):
+        self.vol_bar["value"] = 0
+        self.vol_label["text"] = "🔇"
 
     def delete(self):
         self.icon.grid_forget()
@@ -46,9 +50,11 @@ class AudioApplication:
             self.session = session
             self.id = self.session.Process.pid
             self.name = self.session.Process.name().split(".")[0]
+            self.interface = self.session.SimpleAudioVolume
         self._get_icon()
         self.volume = self.get_volume(master_volume)
-        self.app_row = AppRow(index, self.icon, self.volume)
+        self.muted = self.is_muted()
+        self.app_row = AppRow(index, self.icon, self.volume, self.muted)
         controller.send_icon(index, self.simple_icon_path)
         controller.send_volume(index, self.volume)
 
@@ -68,26 +74,39 @@ class AudioApplication:
         else:
             self.icon = Image.open(icon_path)
 
+    def _set_volume(self, volume):
+        self.interface.SetMasterVolume(volume, None)
+
     def get_volume(self, master_volume):
         return round(self.get_volume_percentage() * master_volume)
 
     def get_volume_percentage(self):
-        return self.session.SimpleAudioVolume.GetMasterVolume()
+        return self.interface.GetMasterVolume()
 
     def update(self, master_volume, controller):
         volume = self.get_volume(master_volume)
         if volume != self.volume:
-            self.app_row.update(volume)
+            self.app_row.set_volume(volume)
             controller.send_volume(self.index, volume)
             self.volume = volume
-
-    def set_volume(self, volume):
-        self.session.SimpleAudioVolume.SetMasterVolume(volume, None)
+        muted = self.is_muted()
+        if muted != self.muted:
+            if muted:
+                self.app_row.set_mute()
+            else:
+                self.app_row.set_volume(volume)
+            self.muted = muted
 
     def change_volume(self, change):
         new_volume = self.get_volume_percentage() + change
         if new_volume >= 0 and new_volume <= 1:
-            self.set_volume(new_volume)
+            self._set_volume(new_volume)
+
+    def is_muted(self):
+        return self.interface.GetMute()
+
+    def toggle_mute(self):
+        self.interface.SetMute(1 if not self.is_muted() else 0, None)
 
     def delete(self):
         self.app_row.delete()
@@ -107,6 +126,9 @@ class MasterAudioApplication(AudioApplication):
         self.icon = ICON
         self.simple_icon_path = SIMPLE_ICON_PATH
 
+    def _set_volume(self, volume):
+        self.master_volume.SetMasterVolumeLevelScalar(volume, None)
+
     def get_volume(self, volume=None):
         if volume:
             return volume
@@ -114,7 +136,10 @@ class MasterAudioApplication(AudioApplication):
             return round(self.get_volume_percentage() * 100)
 
     def get_volume_percentage(self):
-        return self.master_volume.GetMasterVolumeLevelScalar() 
+        return self.master_volume.GetMasterVolumeLevelScalar()
 
-    def set_volume(self, volume):
-        self.master_volume.SetMasterVolumeLevelScalar(volume, None)
+    def is_muted(self):
+        return self.master_volume.GetMute()
+
+    def toggle_mute(self):
+        self.master_volume.SetMute(1 if not self.is_muted() else 0, None)
