@@ -16,20 +16,24 @@
 
 // Encoders
 #define stepSize 2
+#define pushDuration 10000
 
 #define encoder1A 2
 #define encoder1B 3
 #define encoder1Btn 4
 
+// Variables
 Adafruit_ST7735 tft = Adafruit_ST7735(cs, dc, mosi, sclk, rst);
 uint8_t r;
 uint8_t g;
 uint8_t b;
 uint8_t command;
+
 int encoderVal;
 int encoder1Prev;
 int encoder1Movement = 0;
-boolean encoder1CW;
+uint16_t encoder1Push = 0;
+boolean encoder1Pushed = false;
 
 void setup() {
   // Screen setup
@@ -65,9 +69,20 @@ void checkEncoders(){
 }
 
 uint8_t checkEncoder(uint8_t index, uint8_t pinA, uint8_t pinB, uint8_t pinEncoder, int prevVal){
+  // Push
   if (digitalRead(pinEncoder) == LOW){
-    Serial.write(index*10+3);
-  } 
+    encoder1Pushed = true;
+    encoder1Push++;
+    if(encoder1Push == pushDuration){
+      Serial.write(index*10+3);
+      encoder1Push = 0;
+    }
+  } else if(encoder1Pushed){
+    encoder1Pushed = false;
+    encoder1Push = 0;
+  }
+
+  // Rotate
   encoderVal = digitalRead(pinA);
   if (encoderVal != prevVal) {
     if (digitalRead(pinB) != encoderVal) {

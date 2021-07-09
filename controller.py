@@ -62,7 +62,7 @@ class AudioController:
                 app.change_volume(VOLUME_STEP)
             # Press
             elif code == 3:
-                pass
+                app.toggle_mute()
 
     def close(self):
         self.serial.close()

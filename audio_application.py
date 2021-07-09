@@ -4,9 +4,9 @@ from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from tkinter import Label
 from tkinter.ttk import Progressbar
 from PIL.ImageTk import PhotoImage
+from PIL import Image
 import os
 from icoextract import IconExtractor
-from PIL import Image
 
 
 ICONS_FOLDER = "icons"
