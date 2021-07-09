@@ -85,10 +85,6 @@ class AudioApplication:
 
     def update(self, master_volume, controller):
         volume = self.get_volume(master_volume)
-        if volume != self.volume:
-            self.app_row.set_volume(volume)
-            controller.send_volume(self.index, volume)
-            self.volume = volume
         muted = self.is_muted()
         if muted != self.muted:
             if muted:
@@ -96,6 +92,10 @@ class AudioApplication:
             else:
                 self.app_row.set_volume(volume)
             self.muted = muted
+        elif volume != self.volume:
+            self.app_row.set_volume(volume)
+            controller.send_volume(self.index, volume)
+            self.volume = volume
 
     def change_volume(self, change):
         new_volume = self.get_volume_percentage() + change

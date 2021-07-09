@@ -1,5 +1,6 @@
 #include <Adafruit_GFX.h>    // Core graphics library
 #include <Adafruit_ST7735.h> // Hardware-specific library
+#include "Rotary_Encoder.h" // Hardware-specific library
 #include <SPI.h>
 
 // TFT Screen
@@ -14,7 +15,13 @@
 #define margin_x 2
 #define margin_y 10
 
+Adafruit_ST7735 tft = Adafruit_ST7735(cs, dc, mosi, sclk, rst);
+uint8_t r;
+uint8_t g;
+uint8_t b;
+
 // Encoders
+#define numEncoders 1
 #define stepSize 2
 #define pushDuration 10000
 
@@ -22,18 +29,13 @@
 #define encoder1B 3
 #define encoder1Btn 4
 
-// Variables
-Adafruit_ST7735 tft = Adafruit_ST7735(cs, dc, mosi, sclk, rst);
-uint8_t r;
-uint8_t g;
-uint8_t b;
-uint8_t command;
+Rotary_Encoder encoders[] = {
+  Rotary_Encoder(encoder1A, encoder1B, encoder1Btn, digitalRead(encoder1A))
+};
 
-int encoderVal;
-int encoder1Prev;
-int encoder1Movement = 0;
-uint16_t encoder1Push = 0;
-boolean encoder1Pushed = false;
+// Variables
+uint8_t command;
+uint8_t output;
 
 void setup() {
   // Screen setup
@@ -46,7 +48,6 @@ void setup() {
   pinMode(encoder1A, INPUT);
   pinMode(encoder1B, INPUT);
   pinMode(encoder1Btn, INPUT_PULLUP);
-  encoder1Prev = digitalRead(encoder1A);
   
   Serial.begin(19200);
 }
@@ -64,42 +65,11 @@ void loop() {
 }
 
 void checkEncoders(){
-  uint8_t encoderVal = checkEncoder(0, encoder1A, encoder1B, encoder1Btn, encoder1Prev);
-  encoder1Prev = encoderVal;
-}
-
-uint8_t checkEncoder(uint8_t index, uint8_t pinA, uint8_t pinB, uint8_t pinEncoder, int prevVal){
-  // Push
-  if (digitalRead(pinEncoder) == LOW){
-    encoder1Pushed = true;
-    encoder1Push++;
-    if(encoder1Push == pushDuration){
-      Serial.write(index*10+3);
-      encoder1Push = 0;
-    }
-  } else if(encoder1Pushed){
-    encoder1Pushed = false;
-    encoder1Push = 0;
+  for(uint8_t i = 0; i < numEncoders; i++){
+    output = encoders[i].update(digitalRead(encoders[i].pinA), digitalRead(encoders[i].pinB), digitalRead(encoders[i].pinBtn));
+    if(output != 0)
+      Serial.write(output);
   }
-
-  // Rotate
-  encoderVal = digitalRead(pinA);
-  if (encoderVal != prevVal) {
-    if (digitalRead(pinB) != encoderVal) {
-      encoder1Movement++;
-      if(encoder1Movement == stepSize){
-        Serial.write(index*10+2);
-        encoder1Movement = 0;
-      }
-    } else {
-      encoder1Movement--;
-      if(encoder1Movement == -stepSize){
-        Serial.write(index*10+1);
-        encoder1Movement = 0;
-      }
-    }
-  }
-  return encoderVal;
 }
 
 uint8_t getXPosition(uint8_t index){
