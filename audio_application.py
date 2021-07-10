@@ -16,6 +16,8 @@ SIMPLE_ICON_PATH = "icon.png"
 ICON = Image.open(ICON_PATH)
 ICON_SIZE = 60
 MAX_COLOURS = 30
+DRAG_THRESHOLD = 100
+MAX_SCREEN_ICONS = 4
 
 
 class AppRow:
@@ -24,10 +26,36 @@ class AppRow:
         self.icon = Label(image=img)
         self.icon.image = img
         self.icon.grid(row=index, column=0, padx=5, pady=5)
+        if index != 0:
+            self.icon.bind("<Button-1>", self.on_drag_start)
+            self.icon.bind("<B1-Motion>", self.on_drag_motion)
         self.vol_bar = Progressbar(length=200, value=0 if muted else volume, mode="determinate")
         self.vol_bar.grid(row=index, column=1, padx=5, pady=5)
         self.vol_label = Label(text="🔇" if muted else volume, font=('Helvetica bold',14))
         self.vol_label.grid(row=index, column=2, padx=5, pady=5)
+        self.position_change = 0
+        self.dragging = False
+
+    def on_drag_start(self, event):
+        widget = event.widget
+        widget._drag_start_y = event.y
+        self.dragging = True
+
+    def on_drag_motion(self, event):
+        if self.dragging:
+            widget = event.widget
+            y = event.y - widget._drag_start_y
+            if y >= DRAG_THRESHOLD:
+                self.position_change = 1
+            elif y <= - DRAG_THRESHOLD:
+                self.position_change = -1
+
+    def move(self, change):
+        current_row = self.icon.grid_info()["row"]
+        new_row = current_row + change
+        self.icon.grid(row=new_row)
+        self.vol_bar.grid(row=new_row)
+        self.vol_label.grid(row=new_row)
 
     def set_volume(self, volume):
         self.vol_bar["value"] = volume
@@ -55,8 +83,12 @@ class AudioApplication:
         self.volume = self.get_volume(master_volume)
         self.muted = self.is_muted()
         self.app_row = AppRow(index, self.icon, self.volume, self.muted)
-        controller.send_icon(index, self.simple_icon_path)
-        controller.send_volume(index, self.volume)
+        self.draw_on_screen(controller)
+
+    def draw_on_screen(self, controller):
+        if self.index < MAX_SCREEN_ICONS:
+            controller.send_icon(self.index, self.simple_icon_path)
+            controller.send_volume(self.index, self.volume)
 
     def _get_icon(self):
         icon_path = os.path.join(ICONS_FOLDER, self.name + ".png")
@@ -104,6 +136,18 @@ class AudioApplication:
 
     def is_muted(self):
         return self.interface.GetMute()
+
+    def get_position_change(self):
+        return self.app_row.position_change
+
+    def reset_position_change(self):
+        self.app_row.position_change = 0
+        self.app_row.dragging = False
+
+    def move(self, change, controller):
+        self.index += change
+        self.app_row.move(change)
+        self.draw_on_screen(controller)
 
     def toggle_mute(self):
         self.interface.SetMute(1 if not self.is_muted() else 0, None)

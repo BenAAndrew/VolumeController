@@ -42,8 +42,18 @@ def update():
 
     # Update apps
     master_audio.update(master_volume, controller)
-    for app in apps:
+    for i in range(len(apps)):
+        app = apps[i]
         app.update(master_volume, controller)
+        position_change = app.get_position_change()
+        # Swap position
+        if len(apps) > 1 and position_change != 0:
+            other_index = i+position_change
+            if other_index >= 0 and other_index < len(apps):
+                apps[i].move(position_change, controller)
+                apps[other_index].move(-position_change, controller)
+                apps[i], apps[other_index] = apps[other_index], apps[i]
+                app.reset_position_change()
 
     window.after(UPDATE_DELAY, update)
 
