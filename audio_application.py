@@ -11,30 +11,43 @@ from icoextract import IconExtractor
 
 ICONS_FOLDER = "icons"
 os.makedirs(ICONS_FOLDER, exist_ok=True)
-ICON_PATH = "icon.ico"
-SIMPLE_ICON_PATH = "icon.png"
+ASSETS_FOLDER = "assets"
+ICON_PATH = os.path.join(ASSETS_FOLDER, "icon.ico")
+SIMPLE_ICON_PATH = os.path.join(ASSETS_FOLDER, "icon.png")
 ICON = Image.open(ICON_PATH)
 ICON_SIZE = 60
 MAX_COLOURS = 30
-DRAG_THRESHOLD = 100
+DRAG_THRESHOLD = 80
 MAX_SCREEN_ICONS = 4
+EYE_ICON = Image.open(os.path.join(ASSETS_FOLDER, "eye.png"))
+CLOSED_EYE_ICON = Image.open(os.path.join(ASSETS_FOLDER, "eye-slash.png"))
+MUTE_ICON = Image.open(os.path.join(ASSETS_FOLDER, "mute.png"))
 
 
 class AppRow:
     def __init__(self, index, image, volume, muted):
-        img = PhotoImage(image)
-        self.icon = Label(image=img)
-        self.icon.image = img
-        self.icon.grid(row=index, column=0, padx=5, pady=5)
+        self.index = index
+        self.eye_icon = self._add_image(EYE_ICON if index < MAX_SCREEN_ICONS else CLOSED_EYE_ICON)
+        self.eye_icon.grid(row=index, column=0, padx=5, pady=5)
+        self.icon = self._add_image(image)
+        self.icon.grid(row=index, column=1, padx=5, pady=5)
         if index != 0:
             self.icon.bind("<Button-1>", self.on_drag_start)
             self.icon.bind("<B1-Motion>", self.on_drag_motion)
         self.vol_bar = Progressbar(length=200, value=0 if muted else volume, mode="determinate")
-        self.vol_bar.grid(row=index, column=1, padx=5, pady=5)
-        self.vol_label = Label(text="🔇" if muted else volume, font=('Helvetica bold',14))
-        self.vol_label.grid(row=index, column=2, padx=5, pady=5)
+        self.vol_bar.grid(row=index, column=2, padx=5, pady=5)
+        if muted:
+            self.set_mute()
+        else:
+            self.set_volume(volume)
         self.position_change = 0
         self.dragging = False
+
+    def _add_image(self, image):
+        img = PhotoImage(image)
+        icon = Label(image=img)
+        icon.image = img
+        return icon
 
     def on_drag_start(self, event):
         widget = event.widget
@@ -59,11 +72,13 @@ class AppRow:
 
     def set_volume(self, volume):
         self.vol_bar["value"] = volume
-        self.vol_label["text"] = volume
+        self.vol_label = Label(text=volume, font=('Helvetica bold',14))
+        self.vol_label.grid(row=self.index, column=3, padx=5, pady=5)
 
     def set_mute(self):
         self.vol_bar["value"] = 0
-        self.vol_label["text"] = "🔇"
+        self.vol_label = self._add_image(MUTE_ICON)
+        self.vol_label.grid(row=self.index, column=3, padx=5, pady=5)
 
     def delete(self):
         self.icon.grid_forget()
