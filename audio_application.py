@@ -108,7 +108,8 @@ class AudioApplication:
     def toggle_mute(self):
         self.interface.SetMute(1 if not self.is_muted() else 0, None)
 
-    def delete(self):
+    def delete(self, controller):
+        controller.delete_app(self.index)
         self.app_row.delete()
 
 

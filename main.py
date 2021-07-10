@@ -34,7 +34,7 @@ def update():
         session_ids = [session.Process.pid for session in sessions]
         apps_to_remove = [i for i in range(len(apps)) if apps[i].id not in session_ids]
         for i in apps_to_remove:
-            apps[i].delete()
+            apps[i].delete(controller)
             apps.pop(i)
 
     # Update controller
