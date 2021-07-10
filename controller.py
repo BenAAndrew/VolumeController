@@ -43,10 +43,6 @@ class AudioController:
         while not self.is_done():
             pass
 
-    def delete_app(self, position):
-        self.serial.write(b'd')
-        self.serial.write(bytes([position]))
-
     def update(self, master_audio, apps):
         data = int.from_bytes(self.serial.read(), "big")
         if data > 0:

@@ -59,8 +59,6 @@ void loop() {
       drawIcon();
     } else if(command == 'v'){
       displayVolume();
-    } else if(command == 'd'){
-      deleteApp();
     }
   }
   checkEncoders();
@@ -136,13 +134,6 @@ void drawIcon(){
     }
   }
   Serial.write('d');
-}
-
-void deleteApp(){
-  uint8_t pos = getNextInput();
-  uint8_t x = getXPosition(pos);
-  uint8_t y = getYPosition(pos);
-  tft.fillRect(x, y, x+icon_size, y+icon_size, ST7735_BLACK);
 }
 
 uint8_t getNextInput() {

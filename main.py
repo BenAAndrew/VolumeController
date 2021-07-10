@@ -1,15 +1,10 @@
 from tkinter import Tk
 from pycaw.pycaw import AudioUtilities
 
-from audio_application import ICON_PATH, AudioApplication, MasterAudioApplication
+from audio_application import ICON_PATH, AudioApplication, MasterAudioApplication, save_disable_apps
 from controller import AudioController
 
 UPDATE_DELAY = 10
-DISABLED_APPS_FILE = "disabled.txt"
-
-
-with open(DISABLED_APPS_FILE) as f:
-    disabled_apps = set([line[:-1] for line in f.readlines()])
 
 window = Tk()
 window.title("Audio Controller")
@@ -19,12 +14,6 @@ window.resizable(0, 0)
 controller = AudioController()
 master_audio = MasterAudioApplication(controller)
 apps = []
-
-
-def save_disable_apps():
-    with open(DISABLED_APPS_FILE, 'w') as f:
-        for app in disabled_apps:
-            f.write(app+'\n')
 
 
 def update():
@@ -39,7 +28,7 @@ def update():
         app_ids = [app.id for app in apps]
         for session in sessions:
             if session.Process.pid not in app_ids:
-                apps.append(AudioApplication(len(apps)+1, session, master_volume, controller, disabled_apps))
+                apps.append(AudioApplication(len(apps)+1, session, master_volume, controller))
     # Closed app(s)
     elif len(sessions) < len(apps):
         session_ids = [session.Process.pid for session in sessions]
