@@ -16,17 +16,6 @@ SIMPLE_ICON_PATH = "icon.png"
 ICON = Image.open(ICON_PATH)
 ICON_SIZE = 60
 MAX_COLOURS = 30
-DISABLED_APPS_FILE = "disabled.txt"
-
-
-with open(DISABLED_APPS_FILE) as f:
-    disabled_apps = set([line[:-1] for line in f.readlines()])
-
-
-def save_disable_apps():
-    with open(DISABLED_APPS_FILE, 'w') as f:
-        for app in disabled_apps:
-            f.write(app+'\n')
 
 
 class AppRow:
@@ -55,7 +44,7 @@ class AppRow:
 
 
 class AudioApplication:
-    def __init__(self, index, session, master_volume, controller):
+    def __init__(self, index, session, master_volume, controller, disabled_apps):
         self.index = index
         if session:
             self.session = session
@@ -64,30 +53,30 @@ class AudioApplication:
             self.enabled = self.name not in disabled_apps
             self.interface = self.session.SimpleAudioVolume
             self.button = Button(text="Disable" if self.enabled else "Enable", command=self._toggle_enable)
-            self.button.grid(row=index, column=0, padx=5, pady=5)
+            self.button.grid(row=self.index, column=0, padx=5, pady=5)
         else:
+            self.button = None
             self.enabled = True
         self._get_icon()
         self.volume = self.get_volume(master_volume)
         self.muted = self.is_muted()
         self.app_row = AppRow(index, self.icon, self.volume, self.muted)
-        controller.send_icon(index, self.simple_icon_path)
-        controller.send_volume(index, self.volume)
+        if self.enabled:
+            self.drawn = True
+            self._send_icon(controller)
+        else:
+            self.drawn = False
 
+    def _send_icon(self, controller):
+        controller.send_icon(self.index, self.simple_icon_path)
+        controller.send_volume(self.index, self.volume)
+    
     def _toggle_enable(self):
         if self.enabled:
-            self._disable()
+            self.button["text"] = "Enable"
         else:
-            self._enable()
+            self.button["text"] = "Disable"
         self.enabled = not self.enabled
-
-    def _enable(self):
-        disabled_apps.remove(self.name)
-        self.button["text"] = "Disable"
-
-    def _disable(self):
-        disabled_apps.add(self.name)
-        self.button["text"] = "Enable"
 
     def _get_icon(self):
         icon_path = os.path.join(ICONS_FOLDER, self.name + ".png")
@@ -117,16 +106,27 @@ class AudioApplication:
     def update(self, master_volume, controller):
         volume = self.get_volume(master_volume)
         muted = self.is_muted()
+        # App muted
         if muted != self.muted:
             if muted:
                 self.app_row.set_mute()
             else:
                 self.app_row.set_volume(volume)
             self.muted = muted
+        # Volume changed
         elif volume != self.volume:
             self.app_row.set_volume(volume)
             controller.send_volume(self.index, volume)
             self.volume = volume
+        
+        # Disable clicked
+        if self.drawn and not self.enabled:
+            self.drawn = False
+            controller.delete_app(self.index)
+        # Enable clicked
+        elif not self.drawn and self.enabled:
+            self.drawn = True
+            self._send_icon(controller)
 
     def change_volume(self, change):
         new_volume = self.get_volume_percentage() + change
@@ -140,6 +140,8 @@ class AudioApplication:
         self.interface.SetMute(1 if not self.is_muted() else 0, None)
 
     def delete(self):
+        if self.button:
+            self.button.grid_forget()
         self.app_row.delete()
 
 
@@ -151,7 +153,7 @@ class MasterAudioApplication(AudioApplication):
     def __init__(self, controller):
         self.id = 0
         volume = self.get_volume()
-        super().__init__(0, None, volume, controller)
+        super().__init__(0, None, volume, controller, None)
     
     def _get_icon(self):
         self.icon = ICON
