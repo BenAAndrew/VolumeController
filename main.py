@@ -1,7 +1,7 @@
 from tkinter import Tk
 from pycaw.pycaw import AudioUtilities
 
-from audio_application import ICON_PATH, AudioApplication, MasterAudioApplication, save_disable_apps
+from audio_application import ICON_PATH, AudioApplication, MasterAudioApplication
 from controller import AudioController
 
 UPDATE_DELAY = 10
@@ -50,7 +50,6 @@ def update():
 
 
 def on_closing():
-    save_disable_apps()
     controller.close()
     window.destroy()
 
