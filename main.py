@@ -32,11 +32,10 @@ def update():
     # Closed app(s)
     elif len(sessions) < len(apps):
         session_ids = [session.Process.pid for session in sessions]
-        for i in range(len(apps)):
-            app = apps[i]
-            if app.id not in session_ids:
-                app.delete()
-                apps.pop(i)
+        apps_to_remove = [i for i in range(len(apps)) if apps[i].id not in session_ids]
+        for i in apps_to_remove:
+            apps[i].delete()
+            apps.pop(i)
 
     # Update controller
     controller.update(master_audio, apps)
