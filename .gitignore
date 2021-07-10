@@ -1,5 +1,6 @@
 __pycache__/
 icons/
+disabled.txt
 
 build/
 dist/

@@ -2,7 +2,7 @@ from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from tkinter import Label
-from tkinter.ttk import Progressbar
+from tkinter.ttk import Progressbar, Button
 from PIL.ImageTk import PhotoImage
 from PIL import Image
 import os
@@ -16,6 +16,17 @@ SIMPLE_ICON_PATH = "icon.png"
 ICON = Image.open(ICON_PATH)
 ICON_SIZE = 60
 MAX_COLOURS = 30
+DISABLED_APPS_FILE = "disabled.txt"
+
+
+with open(DISABLED_APPS_FILE) as f:
+    disabled_apps = set([line[:-1] for line in f.readlines()])
+
+
+def save_disable_apps():
+    with open(DISABLED_APPS_FILE, 'w') as f:
+        for app in disabled_apps:
+            f.write(app+'\n')
 
 
 class AppRow:
@@ -23,11 +34,11 @@ class AppRow:
         img = PhotoImage(image)
         self.icon = Label(image=img)
         self.icon.image = img
-        self.icon.grid(row=index, column=0, padx=5, pady=5)
+        self.icon.grid(row=index, column=1, padx=5, pady=5)
         self.vol_bar = Progressbar(length=200, value=0 if muted else volume, mode="determinate")
-        self.vol_bar.grid(row=index, column=1, padx=5, pady=5)
+        self.vol_bar.grid(row=index, column=2, padx=5, pady=5)
         self.vol_label = Label(text="🔇" if muted else volume, font=('Helvetica bold',14))
-        self.vol_label.grid(row=index, column=2, padx=5, pady=5)
+        self.vol_label.grid(row=index, column=3, padx=5, pady=5)
 
     def set_volume(self, volume):
         self.vol_bar["value"] = volume
@@ -50,13 +61,33 @@ class AudioApplication:
             self.session = session
             self.id = self.session.Process.pid
             self.name = self.session.Process.name().split(".")[0]
+            self.enabled = self.name not in disabled_apps
             self.interface = self.session.SimpleAudioVolume
+            self.button = Button(text="Disable" if self.enabled else "Enable", command=self._toggle_enable)
+            self.button.grid(row=index, column=0, padx=5, pady=5)
+        else:
+            self.enabled = True
         self._get_icon()
         self.volume = self.get_volume(master_volume)
         self.muted = self.is_muted()
         self.app_row = AppRow(index, self.icon, self.volume, self.muted)
         controller.send_icon(index, self.simple_icon_path)
         controller.send_volume(index, self.volume)
+
+    def _toggle_enable(self):
+        if self.enabled:
+            self._disable()
+        else:
+            self._enable()
+        self.enabled = not self.enabled
+
+    def _enable(self):
+        disabled_apps.remove(self.name)
+        self.button["text"] = "Disable"
+
+    def _disable(self):
+        disabled_apps.add(self.name)
+        self.button["text"] = "Enable"
 
     def _get_icon(self):
         icon_path = os.path.join(ICONS_FOLDER, self.name + ".png")
