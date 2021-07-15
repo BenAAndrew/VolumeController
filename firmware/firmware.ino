@@ -36,6 +36,7 @@ Rotary_Encoder encoders[] = {
 // Variables
 uint8_t command;
 uint8_t output;
+bool isConnected = false;
 
 void setup() {
   // Screen setup
@@ -43,6 +44,7 @@ void setup() {
   tft.fillScreen(ST7735_BLACK);
   tft.setTextColor(ST7735_GREEN, ST7735_BLACK);
   tft.setTextSize(1);
+  displayText(0, 150, "WAITING FOR APP...");
 
   // Encoder setup
   pinMode(encoder1A, INPUT);
@@ -62,6 +64,11 @@ void loop() {
     } else if(command == 'd'){
       deleteApp();
     }
+    if(!isConnected){
+      isConnected = true;
+      tft.fillRect(0, 150, 128, 160, ST7735_BLACK); 
+    }
+    Serial.write('d');
   }
   checkEncoders();
 }
@@ -90,6 +97,11 @@ uint8_t getYPosition(uint8_t index){
   return y;
 }
 
+void displayText(uint8_t x, uint8_t y, String text){
+  tft.setCursor(x,y);
+  tft.print(text);
+}
+
 void displayVolume(){
   uint8_t pos = getNextInput();
   uint8_t volume = getNextInput();
@@ -102,9 +114,7 @@ void displayVolume(){
   }
   uint8_t x = getXPosition(pos);
   uint8_t y = getYPosition(pos);
-  tft.setCursor(x,y);
-  tft.print(text);
-  Serial.write('d');
+  displayText(x, y, text);
 }
 
 void drawIcon(){
@@ -135,7 +145,6 @@ void drawIcon(){
       x++;
     }
   }
-  Serial.write('d');
 }
 
 void deleteApp(){

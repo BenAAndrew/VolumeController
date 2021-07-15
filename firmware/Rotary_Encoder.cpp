@@ -14,14 +14,13 @@ Rotary_Encoder::Rotary_Encoder(unsigned int _pinA, unsigned int _pinB, unsigned 
 
 unsigned int Rotary_Encoder::update(unsigned int _a, unsigned int _b, unsigned int _button){
   // Push
-  if (_button == 0){
-    pushed = true;
+  if (_button == 0 && !pushed){
     pushDuration++;
     if(pushDuration == pushThreshold){
-      pushDuration = 0;
+      pushed = true;
       return index*10+3;
     }
-  } else if(pushed){
+  } else if(_button == 1){
     pushed = false;
     pushDuration = 0;
   }

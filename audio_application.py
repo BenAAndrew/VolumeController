@@ -72,7 +72,7 @@ class AppRow:
 
     def set_volume(self, volume):
         self.vol_bar["value"] = volume
-        self.vol_label = Label(text=volume, font=('Helvetica bold',14))
+        self.vol_label = Label(text=str(volume).ljust(4), font=('Helvetica bold',14))
         self.vol_label.grid(row=self.index, column=3, padx=5, pady=5)
 
     def set_mute(self):
