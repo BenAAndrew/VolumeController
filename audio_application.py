@@ -139,7 +139,7 @@ class AudioApplication:
             else:
                 self.app_row.set_volume(volume)
             self.muted = muted
-        elif volume != self.volume:
+        elif not self.muted and volume != self.volume:
             self.app_row.set_volume(volume)
             controller.send_volume(self.index, volume)
             self.volume = volume

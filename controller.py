@@ -18,9 +18,15 @@ class AudioController:
             except:
                 print(f"Could not connect to COM{i}")
 
-    def is_done(self):
-        return self.serial.read() == b'd'
+    def wait_for_success(func):
+        def wrapper(*args, **kwargs):
+            func(*args, **kwargs)
+            while not args[0].serial.read() == b'd':
+                pass
+        return wrapper
 
+    # Arduino interactions
+    @wait_for_success
     def send_icon(self, position, icon_path):
         self.serial.write(b'i')
         image = imageio.imread(icon_path)
@@ -34,15 +40,12 @@ class AudioController:
         for pixel in pixels:
             self.serial.write(bytes([colours.index(pixel)]))
 
-        while not self.is_done():
-            pass
-
+    @wait_for_success
     def send_volume(self, position, volume):
         self.serial.write(b'v')
         self.serial.write(bytes([position, volume]))
-        while not self.is_done():
-            pass
 
+    @wait_for_success
     def delete_app(self, position):
         self.serial.write(b'd')
         self.serial.write(bytes([position]))
