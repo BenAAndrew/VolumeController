@@ -5,10 +5,10 @@
 
 // TFT Screen
 #define sclk 13
-#define mosi 11
-#define cs   10
-#define dc   8
-#define rst  5
+#define mosi 12
+#define cs   11
+#define dc   10
+#define rst  9
 
 #define icon_size 60
 #define icon_area icon_size*icon_size
@@ -25,9 +25,9 @@ uint8_t b;
 #define stepSize 2
 #define pushDuration 10000
 
-#define encoder1A 2
-#define encoder1B 3
-#define encoder1Btn 4
+#define encoder1A 26
+#define encoder1B 24
+#define encoder1Btn 22
 
 Rotary_Encoder encoders[] = {
   Rotary_Encoder(encoder1A, encoder1B, encoder1Btn, digitalRead(encoder1A))
