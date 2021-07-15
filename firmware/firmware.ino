@@ -61,6 +61,8 @@ void loop() {
       drawIcon();
     } else if(command == 'v'){
       displayVolume();
+    } else if(command == 'm'){
+      muteApp();
     } else if(command == 'd'){
       deleteApp();
     }
@@ -105,7 +107,7 @@ void displayText(uint8_t x, uint8_t y, String text){
 void displayVolume(){
   uint8_t pos = getNextInput();
   uint8_t volume = getNextInput();
-  String text = String(volume);
+  String text = String(volume) + ' ';
   if(volume < 9){
     text += ' ';
   }
@@ -145,6 +147,13 @@ void drawIcon(){
       x++;
     }
   }
+}
+
+void muteApp(){
+  uint8_t pos = getNextInput();
+  uint8_t x = getXPosition(pos);
+  uint8_t y = getYPosition(pos);
+  displayText(x, y, "MUTE");
 }
 
 void deleteApp(){

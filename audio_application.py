@@ -103,7 +103,19 @@ class AudioApplication:
     def draw_on_screen(self, controller):
         if self.index < MAX_SCREEN_ICONS:
             controller.send_icon(self.index, self.simple_icon_path)
-            controller.send_volume(self.index, self.volume)
+            if self.muted:
+                controller.mute_app(self.index)
+            else:
+                controller.send_volume(self.index, self.volume)
+
+    def volume_change(self, volume, controller):
+        self.app_row.set_volume(volume)
+        controller.send_volume(self.index, volume)
+        self.volume = volume
+
+    def mute(self, controller):
+        self.app_row.set_mute()
+        controller.mute_app(self.index)
 
     def _get_icon(self):
         icon_path = os.path.join(ICONS_FOLDER, self.name + ".png")
@@ -135,14 +147,12 @@ class AudioApplication:
         muted = self.is_muted()
         if muted != self.muted:
             if muted:
-                self.app_row.set_mute()
+                self.mute(controller)
             else:
-                self.app_row.set_volume(volume)
+                self.volume_change(volume, controller)
             self.muted = muted
         elif not self.muted and volume != self.volume:
-            self.app_row.set_volume(volume)
-            controller.send_volume(self.index, volume)
-            self.volume = volume
+            self.volume_change(volume, controller)
 
     def change_volume(self, change):
         new_volume = self.get_volume_percentage() + change

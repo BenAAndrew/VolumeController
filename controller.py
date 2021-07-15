@@ -46,6 +46,11 @@ class AudioController:
         self.serial.write(bytes([position, volume]))
 
     @wait_for_success
+    def mute_app(self, position):
+        self.serial.write(b'm')
+        self.serial.write(bytes([position]))
+
+    @wait_for_success
     def delete_app(self, position):
         self.serial.write(b'd')
         self.serial.write(bytes([position]))
