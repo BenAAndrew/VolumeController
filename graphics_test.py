@@ -1,28 +1,11 @@
 import os
-import serial
-import imageio
 import time
 
-serial = serial.Serial("COM3", 9600, timeout=1)
-time.sleep(5)
+from controller import AudioController
 
-def is_done():
-    return serial.read() == b'd'
+controller = AudioController()
 
-def send_icon(icon_path):
-    image = imageio.imread(icon_path)
-    for row in image:
-        serial.write(bytes(row))
-    while not is_done():
-        pass
-    print("BITMAP DRAWN")
-
-def send_text(text):
-    serial.write(str.encode(text))
-    while not is_done():
-        pass
-    print("TEXT DRAWN")
-
-send_icon("icon.bmp")
-send_text("Hello")
-send_icon(os.path.join("icons", "steam.bmp"))
+ASSETS_FOLDER = "assets"
+controller.send_icon(0, os.path.join(ASSETS_FOLDER, "test.png"))
+controller.send_volume(0, 99)
+time.sleep(10)
