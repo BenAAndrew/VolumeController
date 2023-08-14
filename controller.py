@@ -4,11 +4,13 @@ import imageio
 
 VOLUME_STEP = 0.02
 MINIMUM_OPACITY = 200
-BAUDRATE = 19200
+BAUDRATE = 14400
 TIMEOUT = 0.1
 
 
 class AudioController:
+    serial = None
+
     def __init__(self):
         for i in range(2, 10):
             try:
@@ -16,7 +18,8 @@ class AudioController:
                 time.sleep(5)
                 break
             except:
-                print(f"Could not connect to COM{i}")
+                pass
+        assert self.serial, "Could not connect"
 
     def wait_for_success(func):
         def wrapper(*args, **kwargs):
@@ -30,7 +33,7 @@ class AudioController:
     def send_icon(self, position, icon_path):
         self.serial.write(b'i')
         image = imageio.imread(icon_path)
-        pixels = [tuple(p[:3]) if p[3] >= MINIMUM_OPACITY else (0,0,0) for row in image for p in row]
+        pixels = [tuple(p[:3]) for row in image for p in row]
         colours = list(set(pixels))
         self.serial.write(bytes([position, len(colours)]))
 

@@ -51,7 +51,7 @@ void setup() {
   pinMode(encoder1B, INPUT);
   pinMode(encoder1Btn, INPUT_PULLUP);
   
-  Serial.begin(19200);
+  Serial.begin(14400);
 }
 
 void loop() {
@@ -132,7 +132,7 @@ void drawIcon(){
     r = getNextInput();
     g = getNextInput();
     b = getNextInput();
-    colours[i] = tft.Color565(r,g,b);
+    colours[i] = tft.color565(r,g,b);
   }
 
   // Drawing
