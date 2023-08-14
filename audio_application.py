@@ -1,5 +1,6 @@
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
+import psutil
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from tkinter import Label
 from tkinter.ttk import Progressbar
@@ -91,8 +92,11 @@ class AudioApplication:
         self.index = index
         if session:
             self.session = session
-            self.id = self.session.Process.pid
-            self.name = self.session.Process.name().split(".")[0]
+            try:
+                self.id = self.session.Process.pid
+                self.name = self.session.Process.name().split(".")[0]
+            except psutil.NoSuchProcess:
+                self.delete()
             self.interface = self.session.SimpleAudioVolume
         self._get_icon()
         self.volume = self.get_volume(master_volume)
