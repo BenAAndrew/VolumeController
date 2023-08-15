@@ -1,68 +1,68 @@
-from tkinter import Tk
+import threading
+import time
+from comtypes import CoInitialize, CoUninitialize
 from pycaw.pycaw import AudioUtilities
+from app import Application
 
-from audio_application import ICON_PATH, AudioApplication, MasterAudioApplication
-from controller import AudioController
+from manager import Manager
 
-UPDATE_DELAY = 10
+UPDATE_DELAY = 10 / 1000
 
-window = Tk()
-window.title("Audio Controller")
-window.iconbitmap(ICON_PATH)
-window.resizable(0, 0)
-
-controller = AudioController()
-master_audio = MasterAudioApplication(controller)
-apps = []
-
+manager = Manager()
+app = Application()
 
 def update():
-    global apps
-
-    # window.winfo_ismapped()
-    master_volume = master_audio.get_volume()
+    global manager
     sessions = [session for session in AudioUtilities.GetAllSessions() if session.Process]
+    master_volume = manager.master_audio.get_volume()
 
     # New app(s)
-    if len(sessions) > len(apps):
-        app_ids = [app.id for app in apps]
+    if len(sessions) > len(manager.apps):
+        app_ids = [app.id for app in manager.apps]
         for session in sessions:
             if session.Process.pid not in app_ids:
-                apps.append(AudioApplication(len(apps)+1, session, master_volume, controller))
+                manager.add_app(session, master_volume)
+                
     # Closed app(s)
-    elif len(sessions) < len(apps):
+    elif len(sessions) < len(manager.apps):
         session_ids = [session.Process.pid for session in sessions]
-        apps_to_remove = [i for i in range(len(apps)) if apps[i].id not in session_ids]
+        apps_to_remove = [i for i in range(len(manager.apps)) if manager.apps[i].id not in session_ids]
         for i in apps_to_remove:
-            apps[i].delete(controller)
-            apps.pop(i)
+            manager.delete_app(i)
 
-    # Update controller
-    controller.update(master_audio, apps)
+    manager.update()
 
-    # Update apps
-    master_audio.update(master_volume, controller)
-    for i in range(len(apps)):
-        app = apps[i]
-        app.update(master_volume, controller)
-        position_change = app.get_position_change()
-        # Swap position
-        if len(apps) > 1 and position_change != 0:
-            other_index = i+position_change
-            if other_index >= 0 and other_index < len(apps):
-                apps[i].move(position_change, controller)
-                apps[other_index].move(-position_change, controller)
-                apps[i], apps[other_index] = apps[other_index], apps[i]
-                app.reset_position_change()
+    # # Update controller
+    # controller.update(master_audio, apps)
 
-    window.after(UPDATE_DELAY, update)
-
-
-def on_closing():
-    controller.close()
-    window.destroy()
+    # # Update apps
+    # master_audio.update(master_volume, controller)
+    # for i in range(len(apps)):
+    #     app = apps[i]
+    #     app.update(master_volume, controller)
+    #     position_change = app.get_position_change()
+    #     # Swap position
+    #     if len(apps) > 1 and position_change != 0:
+    #         other_index = i+position_change
+    #         if other_index >= 0 and other_index < len(apps):
+    #             apps[i].move(position_change, controller)
+    #             apps[other_index].move(-position_change, controller)
+    #             apps[i], apps[other_index] = apps[other_index], apps[i]
+    #             app.reset_position_change()
 
 
-update()
-window.protocol("WM_DELETE_WINDOW", on_closing)
-window.mainloop()
+def main():
+    CoInitialize()
+    while True:
+        try:
+            update()
+            time.sleep(UPDATE_DELAY)
+        except Exception as e:
+            raise e
+        finally:
+            CoUninitialize()
+
+
+thread = threading.Thread(target=main)
+thread.start()
+app.run()

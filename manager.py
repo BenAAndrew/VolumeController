@@ -1,0 +1,82 @@
+
+
+import os
+from typing import Optional
+import psutil
+import pycaw
+
+from audio_interface import AudioInterface, MasterAudioInterface
+from controller import AudioController
+from display_icon import DisplayIcon
+from fetch_icon import get_icon
+
+
+MAX_SCREEN_ICONS = 4
+ASSETS_FOLDER = "assets"
+
+
+class App:
+    id: int
+    index: int
+    name: str
+    enabled: bool
+    display: Optional[DisplayIcon]
+
+    def __init__(self, id, name, index, enabled, display):
+        self.id = id
+        self.name = name
+        self.index = index
+        self.enabled = enabled
+        self.display = display
+
+    def on_clicked(self):
+        self.enabled = not self.enabled
+
+    def delete(self):
+        if self.display:
+            self.display.delete()
+
+
+class Manager:
+    apps = []
+
+    def __init__(self):
+        self.controller = AudioController()
+        self.master_audio = MasterAudioInterface()
+        self.master_icon = DisplayIcon(
+            os.path.join(ASSETS_FOLDER, "icon.png"),
+            0,
+            self.master_audio.get_volume(),
+            self.master_audio.is_muted(),
+            self.controller
+        )
+
+    def add_app(self, session: pycaw.pycaw.AudioSession, master_volume: int):
+        try:
+            id = session.Process.pid
+            name = session.Process.name().split(".")[0]
+            path = session.Process.exe()
+        except psutil.NoSuchProcess:
+            return
+
+        index = len(self.apps)+1
+        enabled = index < MAX_SCREEN_ICONS
+        
+        if enabled:
+            icon_path = get_icon(path, name)
+            interface = AudioInterface(session)
+            display = DisplayIcon(icon_path, index, interface.get_volume(master_volume), interface.is_muted(), self.controller)
+        else:
+            display = None
+
+        app = App(id, name, index, enabled, display)
+        self.apps.append(app)
+
+    def delete_app(self, index):
+        self.apps[index].delete()
+        self.apps.pop(index)
+
+    def update(self):
+        event = self.controller.poll()
+        if event:
+            print(event)

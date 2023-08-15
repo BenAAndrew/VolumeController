@@ -1,11 +1,24 @@
+from dataclasses import dataclass
+from enum import Enum
 import serial
 import time
 import imageio
 
 VOLUME_STEP = 0.02
-MINIMUM_OPACITY = 200
 BAUDRATE = 14400
 TIMEOUT = 0.1
+
+
+class ControlEventType(Enum):
+    VOLUME_UP = 0
+    VOLUME_DOWN = 1
+    TOGGLE_MUTE = 2
+
+
+@dataclass
+class ControlEvent:
+    event_type = ControlEventType
+    app_index = int
 
 
 class AudioController:
@@ -58,26 +71,31 @@ class AudioController:
         self.serial.write(b'd')
         self.serial.write(bytes([position]))
 
-    def update(self, master_audio, apps):
+    def poll(self):
         data = int.from_bytes(self.serial.read(), "big")
         if data > 0:
             index = data // 10
             code = data % 10
 
-            if index == 0:
-                app = master_audio
-            else:
-                app = apps[index-1]
+            # if index == 0:
+            #     app = master_audio
+            # else:
+            #     app = apps[index-1]
 
             # Anti-clockwise
             if code == 1:
-                app.change_volume(-VOLUME_STEP)
+                event_type = ControlEventType.VOLUME_DOWN
+                # app.change_volume(-VOLUME_STEP)
             # Clockwise
             elif code == 2:
-                app.change_volume(VOLUME_STEP)
+                event_type = ControlEventType.VOLUME_UP
+                # app.change_volume(VOLUME_STEP)
             # Press
             elif code == 3:
-                app.toggle_mute()
+                event_type = ControlEventType.TOGGLE_MUTE
+                # app.toggle_mute()
+
+            return ControlEvent(event_type=event_type, index=index)
 
     def close(self):
         self.serial.close()
