@@ -4,7 +4,6 @@ import serial
 import time
 import imageio
 
-VOLUME_STEP = 0.02
 BAUDRATE = 14400
 TIMEOUT = 0.1
 
@@ -17,8 +16,8 @@ class ControlEventType(Enum):
 
 @dataclass
 class ControlEvent:
-    event_type = ControlEventType
-    app_index = int
+    event_type: ControlEventType
+    app_index: int
 
 
 class AudioController:
@@ -77,25 +76,17 @@ class AudioController:
             index = data // 10
             code = data % 10
 
-            # if index == 0:
-            #     app = master_audio
-            # else:
-            #     app = apps[index-1]
-
             # Anti-clockwise
             if code == 1:
                 event_type = ControlEventType.VOLUME_DOWN
-                # app.change_volume(-VOLUME_STEP)
             # Clockwise
             elif code == 2:
                 event_type = ControlEventType.VOLUME_UP
-                # app.change_volume(VOLUME_STEP)
             # Press
             elif code == 3:
                 event_type = ControlEventType.TOGGLE_MUTE
-                # app.toggle_mute()
 
-            return ControlEvent(event_type=event_type, index=index)
+            return ControlEvent(event_type, index)
 
     def close(self):
         self.serial.close()

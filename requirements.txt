@@ -1,0 +1,5 @@
+pystray==0.19.4
+pycaw==20230407
+pyserial==3.5
+imageio==2.31.1
+icoextract==0.1.4

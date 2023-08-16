@@ -6,11 +6,12 @@ import psutil
 import pycaw
 
 from audio_interface import AudioInterface, MasterAudioInterface
-from controller import AudioController
+from controller import AudioController, ControlEvent, ControlEventType
 from display_icon import DisplayIcon
 from fetch_icon import get_icon
 
 
+VOLUME_STEP = 0.02
 MAX_SCREEN_ICONS = 4
 ASSETS_FOLDER = "assets"
 
@@ -20,13 +21,15 @@ class App:
     index: int
     name: str
     enabled: bool
+    interface: AudioInterface
     display: Optional[DisplayIcon]
 
-    def __init__(self, id, name, index, enabled, display):
+    def __init__(self, id, name, index, enabled, interface, display):
         self.id = id
         self.name = name
         self.index = index
         self.enabled = enabled
+        self.interface = interface
         self.display = display
 
     def on_clicked(self):
@@ -69,14 +72,23 @@ class Manager:
         else:
             display = None
 
-        app = App(id, name, index, enabled, display)
+        app = App(id, name, index, enabled, interface, display)
         self.apps.append(app)
 
     def delete_app(self, index):
         self.apps[index].delete()
         self.apps.pop(index)
 
+    def _handle_controller_event(self, event: ControlEvent):
+        index = event.app_index
+        interface = self.master_audio if index == 0 else self.apps[index-1].interface
+        if event.event_type == ControlEventType.VOLUME_UP or event.event_type == ControlEventType.VOLUME_DOWN:
+            volume_change = VOLUME_STEP if event.event_type == ControlEventType.VOLUME_UP else -VOLUME_STEP
+            interface.change_volume(volume_change)
+        elif event.event_type == ControlEventType.TOGGLE_MUTE:
+            interface.toggle_mute()
+
     def update(self):
         event = self.controller.poll()
         if event:
-            print(event)
+            self._handle_controller_event(event)

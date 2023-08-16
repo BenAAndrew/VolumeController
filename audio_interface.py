@@ -40,7 +40,7 @@ class MasterAudioInterface(AudioInterface):
     def _set_volume(self, volume):
         self.master_volume.SetMasterVolumeLevelScalar(volume, None)
 
-    def get_volume(self, volume=None) -> int:
+    def get_volume(self) -> int:
         return round(self.get_volume_percentage() * 100)
 
     def get_volume_percentage(self) -> float:

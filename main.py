@@ -30,9 +30,9 @@ def update():
         for i in apps_to_remove:
             manager.delete_app(i)
 
+    # Update controller
     manager.update()
 
-    # # Update controller
     # controller.update(master_audio, apps)
 
     # # Update apps
