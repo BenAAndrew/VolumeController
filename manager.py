@@ -16,7 +16,7 @@ MAX_SCREEN_ICONS = 4
 ASSETS_FOLDER = "assets"
 
 
-class App:
+class AudioApp:
     id: int
     index: int
     name: str
@@ -38,7 +38,7 @@ class App:
 
 
 class Manager:
-    apps: List[App] = []
+    apps: List[AudioApp] = []
 
     def __init__(self):
         self.controller = AudioController()
@@ -69,7 +69,7 @@ class Manager:
         else:
             display = None
 
-        app = App(id, name, index, enabled, interface, display)
+        app = AudioApp(id, name, index, enabled, interface, display)
         self.apps.append(app)
 
     def _delete_app(self, index):
