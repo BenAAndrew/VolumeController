@@ -1,23 +1,18 @@
 import threading
-import time
 from comtypes import CoInitialize, CoUninitialize
 
-from app import Application
-from manager import Manager
-
-UPDATE_DELAY = 10 / 1000
+from volume_controller.app import Application
+from volume_controller.manager import Manager
 
 def main():
     manager = Manager()
     CoInitialize()
-    while True:
-        try:
+    try:
+        while True:
             manager.update()
-            time.sleep(UPDATE_DELAY)
-        except Exception as e:
-            raise e
-        finally:
-            CoUninitialize()
+    except Exception as e:
+        CoUninitialize()
+        raise e
 
 thread = threading.Thread(target=main)
 thread.start()

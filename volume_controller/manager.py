@@ -5,10 +5,10 @@ from typing import List, Optional
 import psutil
 from pycaw.pycaw import AudioUtilities, AudioSession
 
-from audio_interface import AudioInterface, MasterAudioInterface
-from controller import AudioController, ControlEvent, ControlEventType
-from display_icon import DisplayIcon
-from fetch_icon import get_icon
+from volume_controller.audio_interface import AudioInterface, MasterAudioInterface
+from volume_controller.controller import AudioController, ControlEvent, ControlEventType
+from volume_controller.display_icon import DisplayIcon
+from volume_controller.fetch_icon import get_icon
 
 
 VOLUME_STEP = 0.02

@@ -3,6 +3,7 @@ from PIL import Image
 from icoextract import IconExtractor
 
 ICONS_FOLDER = "icons"
+os.makedirs(ICONS_FOLDER, exist_ok=True)
 ICON_SIZE = 60
 MAX_COLOURS = 30
 

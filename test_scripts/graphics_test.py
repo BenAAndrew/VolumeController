@@ -1,7 +1,7 @@
 import os
 import time
 
-from controller import AudioController
+from volume_controller.controller import AudioController
 
 controller = AudioController()
 
