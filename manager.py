@@ -3,7 +3,7 @@
 import os
 from typing import List, Optional
 import psutil
-import pycaw
+from pycaw.pycaw import AudioUtilities, AudioSession
 
 from audio_interface import AudioInterface, MasterAudioInterface
 from controller import AudioController, ControlEvent, ControlEventType
@@ -51,7 +51,7 @@ class Manager:
             self.controller
         )
 
-    def add_app(self, session: pycaw.pycaw.AudioSession, master_volume: int):
+    def _add_app(self, session: AudioSession, master_volume: int):
         try:
             id = session.Process.pid
             name = session.Process.name().split(".")[0]
@@ -72,7 +72,7 @@ class Manager:
         app = App(id, name, index, enabled, interface, display)
         self.apps.append(app)
 
-    def delete_app(self, index):
+    def _delete_app(self, index):
         self.apps[index].delete()
         self.apps.pop(index)
 
@@ -96,11 +96,29 @@ class Manager:
                 display.set_mute()
 
     def update(self):
+        sessions = [session for session in AudioUtilities.GetAllSessions() if session.Process]
+        master_volume = self.master_audio.get_volume()
+
+        # New app
+        if len(sessions) > len(self.apps):
+            app_ids = [app.id for app in self.apps]
+            for session in sessions:
+                if session.Process.pid not in app_ids:
+                    self._add_app(session, master_volume)
+                    
+        # Closed app
+        elif len(sessions) < len(self.apps):
+            session_ids = [session.Process.pid for session in sessions]
+            apps_to_remove = [i for i in range(len(self.apps)) if self.apps[i].id not in session_ids]
+            for i in apps_to_remove:
+                self._delete_app(i)
+
+        # Controller events
         event = self.controller.poll()
         if event:
             self._handle_controller_event(event)
 
-        master_volume = self.master_audio.get_volume()
+        # Audio change events
         is_muted = self.master_audio.is_muted()
         self._handle_audio_change(self.master_icon, master_volume, is_muted)
 
