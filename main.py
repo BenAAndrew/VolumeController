@@ -1,11 +1,13 @@
 import threading
 from comtypes import CoInitialize, CoUninitialize
 
-from volume_controller.app import Application
+from volume_controller.app import Application, MenuOption
 from volume_controller.manager import Manager
 
+app = Application()
+
 def main():
-    manager = Manager()
+    manager = Manager(app)
     CoInitialize()
     try:
         while True:
@@ -16,5 +18,5 @@ def main():
 
 thread = threading.Thread(target=main)
 thread.start()
-app = Application()
+
 app.run()

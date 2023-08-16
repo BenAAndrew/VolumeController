@@ -5,6 +5,7 @@ from typing import List, Optional
 import psutil
 from pycaw.pycaw import AudioUtilities, AudioSession
 
+from volume_controller.app import Application
 from volume_controller.audio_interface import AudioInterface, MasterAudioInterface
 from volume_controller.controller import AudioController, ControlEvent, ControlEventType
 from volume_controller.display_icon import DisplayIcon
@@ -18,11 +19,11 @@ ASSETS_FOLDER = "assets"
 
 class AudioApp:
     id: int
-    index: int
+    index: Optional[int]
     name: str
     enabled: bool
     interface: AudioInterface
-    display: Optional[DisplayIcon]
+    display: DisplayIcon
 
     def __init__(self, id, name, index, enabled, interface, display):
         self.id = id
@@ -38,18 +39,25 @@ class AudioApp:
 
 
 class Manager:
-    apps: List[AudioApp] = []
+    audio_apps: List[AudioApp] = []
 
-    def __init__(self):
+    def __init__(self, app):
+        self.app = app
         self.controller = AudioController()
         self.master_audio = MasterAudioInterface()
         self.master_icon = DisplayIcon(
             os.path.join(ASSETS_FOLDER, "icon.png"),
-            0,
             self.master_audio.get_volume(),
             self.master_audio.is_muted(),
             self.controller
         )
+        self.master_icon.draw_on_screen(0)
+
+    def _get_first_available_index(self):
+        app_indexes = [app.index for app in self.audio_apps]
+        for i in range(1, MAX_SCREEN_ICONS):
+            if i not in app_indexes:
+                return i
 
     def _add_app(self, session: AudioSession, master_volume: int):
         try:
@@ -59,26 +67,27 @@ class Manager:
         except psutil.NoSuchProcess:
             return
 
-        index = len(self.apps)+1
-        enabled = index < MAX_SCREEN_ICONS
-        
+        index = self._get_first_available_index()
+        enabled = index is not None
+        icon_path = get_icon(path, name)
+        interface = AudioInterface(session)
+        volume = interface.get_volume(master_volume)
+        is_muted = interface.is_muted()
+        display = DisplayIcon(icon_path, volume, is_muted, self.controller)
+        self.app.add_option(id, name, enabled, self.menu_action)
         if enabled:
-            icon_path = get_icon(path, name)
-            interface = AudioInterface(session)
-            display = DisplayIcon(icon_path, index, interface.get_volume(master_volume), interface.is_muted(), self.controller)
-        else:
-            display = None
+            display.draw_on_screen(index)
 
         app = AudioApp(id, name, index, enabled, interface, display)
-        self.apps.append(app)
+        self.audio_apps.append(app)
 
     def _delete_app(self, index):
-        self.apps[index].delete()
-        self.apps.pop(index)
+        self.audio_apps[index].delete()
+        self.audio_apps.pop(index)
 
     def _handle_controller_event(self, event: ControlEvent):
         index = event.app_index
-        interface = self.master_audio if index == 0 else self.apps[index-1].interface
+        interface = self.master_audio if index == 0 else self.audio_apps[index-1].interface
         if event.event_type == ControlEventType.VOLUME_UP or event.event_type == ControlEventType.VOLUME_DOWN:
             volume_change = VOLUME_STEP if event.event_type == ControlEventType.VOLUME_UP else -VOLUME_STEP
             interface.change_volume(volume_change)
@@ -95,22 +104,34 @@ class Manager:
             else:
                 display.set_mute()
 
+    def menu_action(self, id, enabled):
+        matching_app = next((app for app in self.audio_apps if app.id == id), None)
+
+        if enabled and not matching_app.enabled:
+            index = self._get_first_available_index()
+            matching_app.display.draw_on_screen(index)
+        elif not enabled and matching_app.enabled:
+            matching_app.display.delete()
+            matching_app.index = None
+        
+        matching_app.enabled = enabled
+
     def update(self):
         sessions = [session for session in AudioUtilities.GetAllSessions() if session.Process]
         master_volume = self.master_audio.get_volume()
 
         # New app
-        if len(sessions) > len(self.apps):
-            app_ids = [app.id for app in self.apps]
+        if len(sessions) > len(self.audio_apps):
+            app_ids = [app.id for app in self.audio_apps]
             for session in sessions:
                 if session.Process.pid not in app_ids:
                     self._add_app(session, master_volume)
                     
         # Closed app
-        elif len(sessions) < len(self.apps):
+        elif len(sessions) < len(self.audio_apps):
             session_ids = [session.Process.pid for session in sessions]
-            apps_to_remove = [i for i in range(len(self.apps)) if self.apps[i].id not in session_ids]
-            for i in apps_to_remove:
+            audio_apps_to_remove = [i for i in range(len(self.audio_apps)) if self.audio_apps[i].id not in session_ids]
+            for i in audio_apps_to_remove:
                 self._delete_app(i)
 
         # Controller events
@@ -122,7 +143,7 @@ class Manager:
         is_muted = self.master_audio.is_muted()
         self._handle_audio_change(self.master_icon, master_volume, is_muted)
 
-        for app in self.apps:
+        for app in self.audio_apps:
             app_volume = app.interface.get_volume(master_volume)
             is_muted = app.interface.is_muted()
             self._handle_audio_change(app.display, app_volume, is_muted)

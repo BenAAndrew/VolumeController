@@ -37,7 +37,8 @@ class AudioController:
         def wrapper(*args, **kwargs):
             func(*args, **kwargs)
             while not args[0].serial.read() == b'd':
-                pass
+                print("ALIVE", time.time())
+                # pass
         return wrapper
 
     # Arduino interactions
@@ -75,7 +76,8 @@ class AudioController:
         if data > 0:
             index = data // 10
             code = data % 10
-
+            event_type = None
+            
             # Anti-clockwise
             if code == 1:
                 event_type = ControlEventType.VOLUME_DOWN
@@ -86,7 +88,8 @@ class AudioController:
             elif code == 3:
                 event_type = ControlEventType.TOGGLE_MUTE
 
-            return ControlEvent(event_type, index)
+            if event_type is not None:
+                return ControlEvent(event_type, index)
 
     def close(self):
         self.serial.close()
