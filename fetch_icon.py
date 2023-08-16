@@ -8,12 +8,13 @@ MAX_COLOURS = 30
 
 
 def get_icon(app_path: str, name: str) -> str:
-    icon_path = os.path.join(ICONS_FOLDER, name + "-simple.png")
+    download_path = os.path.join(ICONS_FOLDER, name + ".png")
+    simplified_path = os.path.join(ICONS_FOLDER, name + "-simple.png")
 
-    if not os.path.isfile(icon_path):
+    if not os.path.isfile(simplified_path):
         extractor = IconExtractor(app_path)
-        extractor.export_icon(icon_path)
-        icon = Image.open(icon_path).resize((ICON_SIZE, ICON_SIZE), Image.ANTIALIAS)
-        icon.quantize(MAX_COLOURS).save(icon_path)
+        extractor.export_icon(download_path)
+        icon = Image.open(download_path).resize((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
+        icon.quantize(MAX_COLOURS).save(simplified_path)
 
-    return icon_path
+    return simplified_path

@@ -3,10 +3,17 @@ class DisplayIcon:
         self.controller = controller
         self.icon_path = icon_path
         self.index = index
+        self.volume = volume
+        self.muted = muted
         self.draw_on_screen(volume, muted)
 
-    def volume_change(self, volume):
+    def send_volume(self, volume):
         self.controller.send_volume(self.index, volume)
+        self.volume = volume
+
+    def set_mute(self):
+        self.controller.mute_app(self.index)
+        self.muted = True
 
     def draw_on_screen(self, volume, muted):
         self.controller.send_icon(self.index, self.icon_path)

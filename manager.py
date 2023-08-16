@@ -1,7 +1,7 @@
 
 
 import os
-from typing import Optional
+from typing import List, Optional
 import psutil
 import pycaw
 
@@ -32,16 +32,13 @@ class App:
         self.interface = interface
         self.display = display
 
-    def on_clicked(self):
-        self.enabled = not self.enabled
-
     def delete(self):
         if self.display:
             self.display.delete()
 
 
 class Manager:
-    apps = []
+    apps: List[App] = []
 
     def __init__(self):
         self.controller = AudioController()
@@ -88,7 +85,26 @@ class Manager:
         elif event.event_type == ControlEventType.TOGGLE_MUTE:
             interface.toggle_mute()
 
+    def _handle_audio_change(self, display: DisplayIcon, volume: int, is_muted: bool):
+        if not is_muted and volume != display.volume:
+            display.send_volume(volume)
+        elif is_muted != display.muted:
+            if not is_muted:
+                display.send_volume(volume)
+                display.muted = False
+            else:
+                display.set_mute()
+
     def update(self):
         event = self.controller.poll()
         if event:
             self._handle_controller_event(event)
+
+        master_volume = self.master_audio.get_volume()
+        is_muted = self.master_audio.is_muted()
+        self._handle_audio_change(self.master_icon, master_volume, is_muted)
+
+        for app in self.apps:
+            app_volume = app.interface.get_volume(master_volume)
+            is_muted = app.interface.is_muted()
+            self._handle_audio_change(app.display, app_volume, is_muted)

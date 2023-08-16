@@ -23,7 +23,7 @@ class AudioInterface:
             self._set_volume(new_volume)
 
     def is_muted(self) -> bool:
-        return self.interface.GetMute()
+        return self.interface.GetMute() == 1
 
     def set_muted(self, is_muted):
         self.interface.SetMute(1 if is_muted else 0, None)
@@ -47,7 +47,7 @@ class MasterAudioInterface(AudioInterface):
         return self.master_volume.GetMasterVolumeLevelScalar()
 
     def is_muted(self):
-        return self.master_volume.GetMute()
+        return self.master_volume.GetMute() == 1
 
     def toggle_mute(self):
         self.master_volume.SetMute(1 if not self.is_muted() else 0, None)
