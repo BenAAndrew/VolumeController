@@ -1,11 +1,23 @@
+from dataclasses import dataclass
+from enum import Enum
 import serial
 import time
 import imageio
 
-VOLUME_STEP = 0.02
-MINIMUM_OPACITY = 200
 BAUDRATE = 14400
 TIMEOUT = 0.1
+
+
+class ControlEventType(Enum):
+    VOLUME_UP = 0
+    VOLUME_DOWN = 1
+    TOGGLE_MUTE = 2
+
+
+@dataclass
+class ControlEvent:
+    event_type: ControlEventType
+    app_index: int
 
 
 class AudioController:
@@ -24,14 +36,15 @@ class AudioController:
     def wait_for_success(func):
         def wrapper(*args, **kwargs):
             func(*args, **kwargs)
-            while not args[0].serial.read() == b'd':
+            while not args[0].serial.read() == b"d":
                 pass
+
         return wrapper
 
     # Arduino interactions
     @wait_for_success
     def send_icon(self, position, icon_path):
-        self.serial.write(b'i')
+        self.serial.write(b"i")
         image = imageio.imread(icon_path)
         pixels = [tuple(p[:3]) for row in image for p in row]
         colours = list(set(pixels))
@@ -45,39 +58,38 @@ class AudioController:
 
     @wait_for_success
     def send_volume(self, position, volume):
-        self.serial.write(b'v')
+        self.serial.write(b"v")
         self.serial.write(bytes([position, volume]))
 
     @wait_for_success
     def mute_app(self, position):
-        self.serial.write(b'm')
+        self.serial.write(b"m")
         self.serial.write(bytes([position]))
 
     @wait_for_success
     def delete_app(self, position):
-        self.serial.write(b'd')
+        self.serial.write(b"d")
         self.serial.write(bytes([position]))
 
-    def update(self, master_audio, apps):
+    def poll(self):
         data = int.from_bytes(self.serial.read(), "big")
         if data > 0:
             index = data // 10
             code = data % 10
-
-            if index == 0:
-                app = master_audio
-            else:
-                app = apps[index-1]
+            event_type = None
 
             # Anti-clockwise
             if code == 1:
-                app.change_volume(-VOLUME_STEP)
+                event_type = ControlEventType.VOLUME_DOWN
             # Clockwise
             elif code == 2:
-                app.change_volume(VOLUME_STEP)
+                event_type = ControlEventType.VOLUME_UP
             # Press
             elif code == 3:
-                app.toggle_mute()
+                event_type = ControlEventType.TOGGLE_MUTE
+
+            if event_type is not None:
+                return ControlEvent(event_type, index)
 
     def close(self):
         self.serial.close()
