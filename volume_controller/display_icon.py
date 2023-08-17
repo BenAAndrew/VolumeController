@@ -20,14 +20,10 @@ class DisplayIcon:
 
     def draw_on_screen(self, index):
         self.index = index
-        print("DRAW")
         self.controller.send_icon(index, self.icon_path)
-        print("DONE DRAWING")
         if self.muted:
-            print("MUTED")
             self.controller.mute_app(index)
         else:
-            print("SEND VOLUME", self.volume)
             self.controller.send_volume(index, self.volume)
 
     def delete(self):

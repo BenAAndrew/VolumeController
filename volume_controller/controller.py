@@ -37,8 +37,7 @@ class AudioController:
         def wrapper(*args, **kwargs):
             func(*args, **kwargs)
             while not args[0].serial.read() == b'd':
-                print("ALIVE", time.time())
-                # pass
+                pass
         return wrapper
 
     # Arduino interactions

@@ -1,7 +1,7 @@
 
 
 import os
-from typing import List, Optional
+from typing import Any, List, Optional, Tuple
 import psutil
 from pycaw.pycaw import AudioUtilities, AudioSession
 
@@ -40,6 +40,7 @@ class AudioApp:
 
 class Manager:
     audio_apps: List[AudioApp] = []
+    queued_display_task: Optional[Tuple[callable, Any]] = None
 
     def __init__(self, app):
         self.app = app
@@ -109,11 +110,11 @@ class Manager:
 
         if enabled and not matching_app.enabled:
             index = self._get_first_available_index()
-            matching_app.display.draw_on_screen(index)
+            self.queued_display_task = (matching_app.display.draw_on_screen, index)
         elif not enabled and matching_app.enabled:
-            matching_app.display.delete()
+            self.queued_display_task = (matching_app.display.delete, None)
             matching_app.index = None
-        
+
         matching_app.enabled = enabled
 
     def update(self):
@@ -133,6 +134,15 @@ class Manager:
             audio_apps_to_remove = [i for i in range(len(self.audio_apps)) if self.audio_apps[i].id not in session_ids]
             for i in audio_apps_to_remove:
                 self._delete_app(i)
+
+        # Menu action
+        if self.queued_display_task:
+            func, arg = self.queued_display_task
+            if arg:
+                func(arg)
+            else:
+                func()
+            self.queued_display_task = None
 
         # Controller events
         event = self.controller.poll()
