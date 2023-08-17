@@ -22,7 +22,7 @@ class MenuOption:
 class Application:
     def __init__(self):
         image = Image.open(ICON_PATH)
-        self.menu_items = [pystray.MenuItem('Quit', self.quit_window)]
+        self.menu_items = [pystray.MenuItem("Quit", self.quit_window)]
         self.icon = pystray.Icon("name", image, TITLE, pystray.Menu(*self.menu_items))
 
     def quit_window(self, icon, item):

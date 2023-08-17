@@ -6,6 +6,7 @@ from volume_controller.manager import Manager
 
 app = Application()
 
+
 def main():
     manager = Manager(app)
     CoInitialize()
@@ -15,6 +16,7 @@ def main():
     except Exception as e:
         CoUninitialize()
         raise e
+
 
 thread = threading.Thread(target=main)
 thread.start()

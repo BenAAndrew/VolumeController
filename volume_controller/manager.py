@@ -1,5 +1,3 @@
-
-
 import os
 from typing import Any, List, Optional, Tuple
 import psutil
@@ -50,7 +48,7 @@ class Manager:
             os.path.join(ASSETS_FOLDER, "icon.png"),
             self.master_audio.get_volume(),
             self.master_audio.is_muted(),
-            self.controller
+            self.controller,
         )
         self.master_icon.draw_on_screen(0)
 
@@ -88,7 +86,7 @@ class Manager:
 
     def _handle_controller_event(self, event: ControlEvent):
         index = event.app_index
-        interface = self.master_audio if index == 0 else self.audio_apps[index-1].interface
+        interface = self.master_audio if index == 0 else self.audio_apps[index - 1].interface
         if event.event_type == ControlEventType.VOLUME_UP or event.event_type == ControlEventType.VOLUME_DOWN:
             volume_change = VOLUME_STEP if event.event_type == ControlEventType.VOLUME_UP else -VOLUME_STEP
             interface.change_volume(volume_change)
@@ -127,7 +125,7 @@ class Manager:
             for session in sessions:
                 if session.Process.pid not in app_ids:
                     self._add_app(session, master_volume)
-                    
+
         # Closed app
         elif len(sessions) < len(self.audio_apps):
             session_ids = [session.Process.pid for session in sessions]
