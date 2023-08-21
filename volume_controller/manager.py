@@ -1,7 +1,7 @@
 import os
 from typing import Any, List, Optional, Tuple
 import psutil
-from pycaw.pycaw import AudioUtilities, AudioSession
+from pycaw.pycaw import AudioSession
 from volume_controller.app import Application
 
 from volume_controller.audio_interface import AudioInterface, MasterAudioInterface
@@ -93,6 +93,10 @@ class Manager:
         elif event.event_type == ControlEventType.TOGGLE_MUTE:
             interface.toggle_mute()
 
+    def _get_sessions(self):
+        from pycaw.pycaw import AudioUtilities
+        return AudioUtilities.GetAllSessions()
+
     def _handle_audio_change(self, display: DisplayIcon, volume: int, is_muted: bool):
         if not is_muted and (volume != display.volume or is_muted != display.muted):
             display.send_volume(volume)
@@ -116,7 +120,7 @@ class Manager:
         matching_app.enabled = enabled
 
     def update(self):
-        sessions = [session for session in AudioUtilities.GetAllSessions() if session.Process]
+        sessions = [session for session in self._get_sessions() if session.Process]
         master_volume = self.master_audio.get_volume()
 
         # New app
