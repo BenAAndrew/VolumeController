@@ -8,7 +8,10 @@ from volume_controller.manager import VOLUME_STEP, Manager
 
 
 class MockedApp:
-    options: List[MenuOption] = []
+    options: List[MenuOption]
+
+    def __init__(self):
+        self.options = []
 
     def add_option(self, id, name, enabled, callback):
         self.options.append(MenuOption(id=id, enabled=enabled, callback=callback))

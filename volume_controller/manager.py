@@ -36,11 +36,13 @@ class AudioApp:
 
 
 class Manager:
-    audio_apps: List[AudioApp] = []
-    queued_display_task: Optional[Tuple[callable, Any]] = None
+    audio_apps: List[AudioApp]
+    queued_display_task: Optional[Tuple[callable, Any]]
 
     def __init__(self, app: Application):
         self.app = app
+        self.audio_apps = []
+        self.queued_display_task = None
         self.controller = AudioController()
         self.master_audio = MasterAudioInterface()
         self.master_icon = DisplayIcon(
