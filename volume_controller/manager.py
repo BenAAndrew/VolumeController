@@ -2,12 +2,12 @@ import os
 from typing import Any, List, Optional, Tuple
 import psutil
 from pycaw.pycaw import AudioUtilities, AudioSession
-
 from volume_controller.app import Application
+
 from volume_controller.audio_interface import AudioInterface, MasterAudioInterface
 from volume_controller.controller import AudioController, ControlEvent, ControlEventType
 from volume_controller.display_icon import DisplayIcon
-from volume_controller.fetch_icon import get_icon
+from volume_controller.fetch_icon import fetch_icon
 
 
 VOLUME_STEP = 0.02
@@ -40,7 +40,7 @@ class Manager:
     audio_apps: List[AudioApp] = []
     queued_display_task: Optional[Tuple[callable, Any]] = None
 
-    def __init__(self, app):
+    def __init__(self, app: Application):
         self.app = app
         self.controller = AudioController()
         self.master_audio = MasterAudioInterface()
@@ -68,7 +68,7 @@ class Manager:
 
         index = self._get_first_available_index()
         enabled = index is not None
-        icon_path = get_icon(path, name)
+        icon_path = fetch_icon(path, name)
         interface = AudioInterface(session)
         volume = interface.get_volume(master_volume)
         is_muted = interface.is_muted()
@@ -94,11 +94,11 @@ class Manager:
             interface.toggle_mute()
 
     def _handle_audio_change(self, display: DisplayIcon, volume: int, is_muted: bool):
-        if not is_muted and volume != display.volume:
+        if not is_muted and (volume != display.volume or is_muted != display.muted):
             display.send_volume(volume)
-        elif is_muted != display.muted:
+
+        if is_muted != display.muted:
             if not is_muted:
-                display.send_volume(volume)
                 display.muted = False
             else:
                 display.set_mute()
