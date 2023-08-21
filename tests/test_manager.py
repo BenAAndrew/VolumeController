@@ -4,7 +4,7 @@ from unittest import mock
 from volume_controller.app import MenuOption
 from volume_controller.controller import ControlEvent, ControlEventType
 
-from volume_controller.manager import VOLUME_STEP, AudioApp, Manager
+from volume_controller.manager import VOLUME_STEP, Manager
 
 
 class MockedApp:
