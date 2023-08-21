@@ -1,6 +1,17 @@
 from ctypes import cast, POINTER
 
 
+class AudioSession:
+    class Process:
+        pid: int
+
+        def name(self) -> str:
+            pass
+
+        def exe(self) -> str:
+            pass
+
+
 class AudioInterface:
     def __init__(self, session):
         if session:

@@ -1,10 +1,9 @@
 import os
 from typing import Any, List, Optional, Tuple
 import psutil
-from pycaw.pycaw import AudioSession
 from volume_controller.app import Application
 
-from volume_controller.audio_interface import AudioInterface, MasterAudioInterface
+from volume_controller.audio_interface import AudioSession, AudioInterface, MasterAudioInterface
 from volume_controller.controller import AudioController, ControlEvent, ControlEventType
 from volume_controller.display_icon import DisplayIcon
 from volume_controller.fetch_icon import fetch_icon
