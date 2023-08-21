@@ -108,11 +108,11 @@ def test_initialize_manager(draw_on_screen, MasterAudioInterface, AudioControlle
 @mock.patch('volume_controller.manager.MasterAudioInterface')
 @mock.patch('volume_controller.manager.AudioInterface')
 @mock.patch('volume_controller.manager.DisplayIcon.draw_on_screen')
-@mock.patch('volume_controller.manager.AudioUtilities.GetAllSessions')
+@mock.patch('volume_controller.manager.Manager._get_sessions')
 @mock.patch('volume_controller.manager.fetch_icon')
-def test_add_app(fetch_icon, GetAllSessions, draw_on_screen, AudioInterface, MasterAudioInterface, AudioController):
+def test_add_app(fetch_icon, _get_sessions, draw_on_screen, AudioInterface, MasterAudioInterface, AudioController):
     mocked_session = MockedSession(MockedProcess(pid=1, process_name="app"))
-    GetAllSessions.return_value = [mocked_session]
+    _get_sessions.return_value = [mocked_session]
     AudioController.return_value = MockedAudioController(None)
 
     mocked_app = MockedApp()
@@ -136,12 +136,12 @@ def test_add_app(fetch_icon, GetAllSessions, draw_on_screen, AudioInterface, Mas
 @mock.patch('volume_controller.manager.MasterAudioInterface')
 @mock.patch('volume_controller.manager.AudioInterface')
 @mock.patch('volume_controller.manager.DisplayIcon.draw_on_screen')
-@mock.patch('volume_controller.manager.AudioUtilities.GetAllSessions')
+@mock.patch('volume_controller.manager.Manager._get_sessions')
 @mock.patch('volume_controller.manager.fetch_icon')
-def test_add_app_without_render(fetch_icon, GetAllSessions, draw_on_screen, AudioInterface, MasterAudioInterface, AudioController):
+def test_add_app_without_render(fetch_icon, _get_sessions, draw_on_screen, AudioInterface, MasterAudioInterface, AudioController):
     mocked_sessions = [MockedSession(MockedProcess(pid=i, process_name=f"{i}")) for i in range(1,5)]
     session = mocked_sessions[3]
-    GetAllSessions.return_value = mocked_sessions
+    _get_sessions.return_value = mocked_sessions
     AudioController.return_value = MockedAudioController(None)
 
     mocked_app = MockedApp()
@@ -160,9 +160,9 @@ def test_add_app_without_render(fetch_icon, GetAllSessions, draw_on_screen, Audi
 @mock.patch('volume_controller.manager.MasterAudioInterface')
 @mock.patch('volume_controller.manager.AudioInterface')
 @mock.patch('volume_controller.manager.DisplayIcon')
-@mock.patch('volume_controller.manager.AudioUtilities.GetAllSessions')
+@mock.patch('volume_controller.manager.Manager._get_sessions')
 @mock.patch('volume_controller.manager.fetch_icon')
-def test_remove_app(fetch_icon, GetAllSessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
+def test_remove_app(fetch_icon, _get_sessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
     mocked_display_icon = MockedDisplayIcon(1, False, 50)
     DisplayIcon.return_value = mocked_display_icon
     AudioController.return_value = MockedAudioController(None)
@@ -174,7 +174,7 @@ def test_remove_app(fetch_icon, GetAllSessions, DisplayIcon, AudioInterface, Mas
     manager._add_app(mocked_session, 100)
     assert len(manager.audio_apps) == 1
 
-    GetAllSessions.return_value = []
+    _get_sessions.return_value = []
     manager.update()
     assert len(manager.audio_apps) == 0
     assert mocked_display_icon.deleted
@@ -184,9 +184,9 @@ def test_remove_app(fetch_icon, GetAllSessions, DisplayIcon, AudioInterface, Mas
 @mock.patch('volume_controller.manager.MasterAudioInterface')
 @mock.patch('volume_controller.manager.AudioInterface')
 @mock.patch('volume_controller.manager.DisplayIcon')
-@mock.patch('volume_controller.manager.AudioUtilities.GetAllSessions')
+@mock.patch('volume_controller.manager.Manager._get_sessions')
 @mock.patch('volume_controller.manager.fetch_icon')
-def test_handle_control_event_master_volume(fetch_icon, GetAllSessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
+def test_handle_control_event_master_volume(fetch_icon, _get_sessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
     event = ControlEvent(ControlEventType.VOLUME_UP, 0)
     AudioController.return_value = MockedAudioController(event)
 
@@ -201,11 +201,11 @@ def test_handle_control_event_master_volume(fetch_icon, GetAllSessions, DisplayI
 @mock.patch('volume_controller.manager.MasterAudioInterface')
 @mock.patch('volume_controller.manager.AudioInterface')
 @mock.patch('volume_controller.manager.DisplayIcon')
-@mock.patch('volume_controller.manager.AudioUtilities.GetAllSessions')
+@mock.patch('volume_controller.manager.Manager._get_sessions')
 @mock.patch('volume_controller.manager.fetch_icon')
-def test_handle_control_event_volume(fetch_icon, GetAllSessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
+def test_handle_control_event_volume(fetch_icon, _get_sessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
     mocked_session = MockedSession(MockedProcess(pid=1, process_name="app"))
-    GetAllSessions.return_value = [mocked_session]
+    _get_sessions.return_value = [mocked_session]
     event = ControlEvent(ControlEventType.VOLUME_DOWN, 1)
     AudioController.return_value = MockedAudioController(event)
 
@@ -221,9 +221,9 @@ def test_handle_control_event_volume(fetch_icon, GetAllSessions, DisplayIcon, Au
 @mock.patch('volume_controller.manager.MasterAudioInterface')
 @mock.patch('volume_controller.manager.AudioInterface')
 @mock.patch('volume_controller.manager.DisplayIcon')
-@mock.patch('volume_controller.manager.AudioUtilities.GetAllSessions')
+@mock.patch('volume_controller.manager.Manager._get_sessions')
 @mock.patch('volume_controller.manager.fetch_icon')
-def test_handle_control_event_toggle_mute(fetch_icon, GetAllSessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
+def test_handle_control_event_toggle_mute(fetch_icon, _get_sessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
     event = ControlEvent(ControlEventType.TOGGLE_MUTE, 0)
     AudioController.return_value = MockedAudioController(event)
 
@@ -238,9 +238,9 @@ def test_handle_control_event_toggle_mute(fetch_icon, GetAllSessions, DisplayIco
 @mock.patch('volume_controller.manager.MasterAudioInterface')
 @mock.patch('volume_controller.manager.AudioInterface')
 @mock.patch('volume_controller.manager.DisplayIcon')
-@mock.patch('volume_controller.manager.AudioUtilities.GetAllSessions')
+@mock.patch('volume_controller.manager.Manager._get_sessions')
 @mock.patch('volume_controller.manager.fetch_icon')
-def test_handle_audio_change_volume(fetch_icon, GetAllSessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
+def test_handle_audio_change_volume(fetch_icon, _get_sessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
     MasterAudioInterface.return_value = MockedMasterAudioInterface(False, 10)
     AudioController.return_value = MockedAudioController(None)
 
@@ -256,9 +256,9 @@ def test_handle_audio_change_volume(fetch_icon, GetAllSessions, DisplayIcon, Aud
 @mock.patch('volume_controller.manager.MasterAudioInterface')
 @mock.patch('volume_controller.manager.AudioInterface')
 @mock.patch('volume_controller.manager.DisplayIcon')
-@mock.patch('volume_controller.manager.AudioUtilities.GetAllSessions')
+@mock.patch('volume_controller.manager.Manager._get_sessions')
 @mock.patch('volume_controller.manager.fetch_icon')
-def test_handle_audio_change_mute(fetch_icon, GetAllSessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
+def test_handle_audio_change_mute(fetch_icon, _get_sessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
     MasterAudioInterface.return_value = MockedMasterAudioInterface(False, 10)
     AudioController.return_value = MockedAudioController(None)
 
@@ -274,9 +274,9 @@ def test_handle_audio_change_mute(fetch_icon, GetAllSessions, DisplayIcon, Audio
 @mock.patch('volume_controller.manager.MasterAudioInterface')
 @mock.patch('volume_controller.manager.AudioInterface')
 @mock.patch('volume_controller.manager.DisplayIcon')
-@mock.patch('volume_controller.manager.AudioUtilities.GetAllSessions')
+@mock.patch('volume_controller.manager.Manager._get_sessions')
 @mock.patch('volume_controller.manager.fetch_icon')
-def test_handle_audio_change_unmute(fetch_icon, GetAllSessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
+def test_handle_audio_change_unmute(fetch_icon, _get_sessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
     MasterAudioInterface.return_value = MockedMasterAudioInterface(True, 10)
     AudioController.return_value = MockedAudioController(None)
     DisplayIcon.return_value = MockedDisplayIcon(1, True, 0)
@@ -294,10 +294,10 @@ def test_handle_audio_change_unmute(fetch_icon, GetAllSessions, DisplayIcon, Aud
 @mock.patch('volume_controller.manager.MasterAudioInterface')
 @mock.patch('volume_controller.manager.AudioInterface')
 @mock.patch('volume_controller.manager.DisplayIcon')
-@mock.patch('volume_controller.manager.AudioUtilities.GetAllSessions')
+@mock.patch('volume_controller.manager.Manager._get_sessions')
 @mock.patch('volume_controller.manager.fetch_icon')
-def test_handle_audio_change_apps(fetch_icon, GetAllSessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
-    GetAllSessions.return_value = [MockedSession(MockedProcess(pid=1, process_name="app"))]
+def test_handle_audio_change_apps(fetch_icon, _get_sessions, DisplayIcon, AudioInterface, MasterAudioInterface, AudioController):
+    _get_sessions.return_value = [MockedSession(MockedProcess(pid=1, process_name="app"))]
     AudioInterface.return_value = MockedAudioInterface(False, 10)
     AudioController.return_value = MockedAudioController(None)
 
@@ -312,7 +312,8 @@ def test_handle_audio_change_apps(fetch_icon, GetAllSessions, DisplayIcon, Audio
 
 
 @mock.patch('volume_controller.manager.AudioController')
-def test_menu_action_enable_app(AudioController):
+@mock.patch('volume_controller.manager.MasterAudioInterface')
+def test_menu_action_enable_app(MasterAudioInterface, AudioController):
     mocked_app = MockedApp()
     manager = Manager(mocked_app)
     manager.audio_apps = [MockedAudioApp(1, None, False, MockedDisplayIcon(1, False, 100, False))]
@@ -322,7 +323,8 @@ def test_menu_action_enable_app(AudioController):
 
 
 @mock.patch('volume_controller.manager.AudioController')
-def test_menu_action_delete_app(AudioController):
+@mock.patch('volume_controller.manager.MasterAudioInterface')
+def test_menu_action_delete_app(MasterAudioInterface, AudioController):
     mocked_app = MockedApp()
     manager = Manager(mocked_app)
     manager.audio_apps = [MockedAudioApp(1, None, True, MockedDisplayIcon(1, False, 100, False))]
