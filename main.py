@@ -1,7 +1,7 @@
 import threading
 from comtypes import CoInitialize, CoUninitialize
 
-from volume_controller.app import Application, MenuOption
+from volume_controller.app import Application
 from volume_controller.manager import Manager
 
 app = Application()

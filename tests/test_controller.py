@@ -1,4 +1,3 @@
-from msilib.schema import ControlEvent
 import os
 from typing import Union
 from unittest import mock
