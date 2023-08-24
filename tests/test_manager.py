@@ -7,14 +7,26 @@ from volume_controller.controller import ControlEvent, ControlEventType
 from volume_controller.manager import VOLUME_STEP, Manager
 
 
+@dataclass
+class MockedMenuOption:
+    id: int
+    enabled: bool
+    callback: callable
+    name: str
+
+    def on_clicked(self):
+        self.enabled = not self.enabled
+        self.callback(self.id, self.enabled)
+
+
 class MockedApp:
-    options: List[MenuOption]
+    options: List[MockedMenuOption]
 
     def __init__(self):
         self.options = []
 
     def add_option(self, id, name, enabled, callback):
-        self.options.append(MenuOption(id=id, enabled=enabled, callback=callback, name=name))
+        self.options.append(MockedMenuOption(id=id, enabled=enabled, callback=callback, name=name))
 
     def remove_option(self, id):
         matching_index = [index for index, item in enumerate(self.options) if item.id == id][0]
