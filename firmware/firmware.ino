@@ -40,7 +40,6 @@ bool isConnected = false;
 
 void setup() {
   // Screen setup
-  tft.initR(INITR_REDTAB);
   tft.initR(INITR_BLACKTAB);
   tft.fillScreen(ST7735_BLACK);
   tft.setTextColor(ST7735_GREEN, ST7735_BLACK);
