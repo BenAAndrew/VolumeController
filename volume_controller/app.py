@@ -2,8 +2,10 @@ from dataclasses import dataclass
 import os
 from PIL import Image
 
+from volume_controller.utils import resource
 
-ICON_PATH = os.path.join("assets", "icon.ico")
+
+ICON_PATH = resource(os.path.join("assets", "icon.ico"))
 TITLE = "Audio Controller"
 
 

@@ -7,6 +7,7 @@ from volume_controller.audio_interface import AudioSession, AudioInterface, Mast
 from volume_controller.controller import AudioController, ControlEvent, ControlEventType
 from volume_controller.display_icon import DisplayIcon
 from volume_controller.fetch_icon import fetch_icon
+from volume_controller.utils import resource
 
 
 VOLUME_STEP = 0.02
@@ -46,7 +47,7 @@ class Manager:
         self.controller = AudioController()
         self.master_audio = MasterAudioInterface()
         self.master_icon = DisplayIcon(
-            os.path.join(ASSETS_FOLDER, "icon.png"),
+            resource(os.path.join(ASSETS_FOLDER, "icon.png")),
             self.master_audio.get_volume(),
             self.master_audio.is_muted(),
             self.controller,
