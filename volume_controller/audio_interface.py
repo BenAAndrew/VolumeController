@@ -43,6 +43,7 @@ class MasterAudioInterface(AudioInterface):
         super().__init__(None)
         from comtypes import CLSCTX_ALL
         from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+
         devices = AudioUtilities.GetSpeakers()
         self.interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
         self.master_volume = cast(self.interface, POINTER(IAudioEndpointVolume))

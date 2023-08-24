@@ -21,6 +21,7 @@ class MenuOption:
 class Application:
     def __init__(self):
         import pystray
+
         self.tray_app = pystray
         image = Image.open(ICON_PATH)
         self.menu_items = [self.tray_app.MenuItem("Quit", self.quit_window)]

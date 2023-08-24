@@ -96,6 +96,7 @@ class Manager:
 
     def _get_sessions(self):
         from pycaw.pycaw import AudioUtilities
+
         return AudioUtilities.GetAllSessions()
 
     def _handle_audio_change(self, display: DisplayIcon, volume: int, is_muted: bool):

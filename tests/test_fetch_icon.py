@@ -9,7 +9,7 @@ from volume_controller.fetch_icon import fetch_icon
 ICONS_FOLDER = "icons"
 
 
-@mock.patch('volume_controller.fetch_icon.IconExtractor')
+@mock.patch("volume_controller.fetch_icon.IconExtractor")
 def test_fetch_icon(iconExtractor):
     path = os.path.join("icons", "icon-simple.png")
     os.makedirs(ICONS_FOLDER, exist_ok=True)
