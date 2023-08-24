@@ -19,15 +19,17 @@ class MenuOption:
 
 
 class Application:
-    def __init__(self):
+    def __init__(self, on_close: callable):
         import pystray
 
         self.tray_app = pystray
         image = Image.open(ICON_PATH)
         self.menu_items = [self.tray_app.MenuItem("Quit", self.quit_window)]
         self.icon = self.tray_app.Icon("name", image, TITLE, self.tray_app.Menu(*self.menu_items))
+        self.on_close = on_close
 
     def quit_window(self, icon, item):
+        self.on_close()
         self.icon.stop()
 
     def update_options(self):
