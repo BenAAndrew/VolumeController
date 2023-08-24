@@ -8,7 +8,7 @@ ICON_SIZE = 60
 MAX_COLOURS = 30
 
 
-def get_icon(app_path: str, name: str) -> str:
+def fetch_icon(app_path: str, name: str) -> str:
     download_path = os.path.join(ICONS_FOLDER, name + ".png")
     simplified_path = os.path.join(ICONS_FOLDER, name + "-simple.png")
 

@@ -1,0 +1,20 @@
+version: 2.1
+orbs:
+  codecov: codecov/codecov@3.2.5
+jobs:
+  build:
+    docker:
+      - image: cimg/python:3.11.4
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: pip install -r requirements.txt
+      - run:
+          name: Install additional tools
+          command: pip install pytest==7.4.0 pytest-cov==4.1.0
+      - run:
+          name: Run tests
+          command: pytest --cov volume_controller
+      - codecov/upload:
+          file: .coverage

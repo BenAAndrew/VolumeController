@@ -1,6 +1,15 @@
 from ctypes import cast, POINTER
-from comtypes import CLSCTX_ALL
-from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+
+
+class AudioSession:
+    class Process:
+        pid: int
+
+        def name(self) -> str:
+            pass
+
+        def exe(self) -> str:
+            pass
 
 
 class AudioInterface:
@@ -30,12 +39,14 @@ class AudioInterface:
 
 
 class MasterAudioInterface(AudioInterface):
-    devices = AudioUtilities.GetSpeakers()
-    interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-    master_volume = cast(interface, POINTER(IAudioEndpointVolume))
-
     def __init__(self):
         super().__init__(None)
+        from comtypes import CLSCTX_ALL
+        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+
+        devices = AudioUtilities.GetSpeakers()
+        self.interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+        self.master_volume = cast(self.interface, POINTER(IAudioEndpointVolume))
 
     def _set_volume(self, volume):
         self.master_volume.SetMasterVolumeLevelScalar(volume, None)
