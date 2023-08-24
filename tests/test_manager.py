@@ -14,7 +14,11 @@ class MockedApp:
         self.options = []
 
     def add_option(self, id, name, enabled, callback):
-        self.options.append(MenuOption(id=id, enabled=enabled, callback=callback))
+        self.options.append(MenuOption(id=id, enabled=enabled, callback=callback, name=name))
+
+    def remove_option(self, id):
+        matching_index = [index for index, item in enumerate(self.options) if item.id == id][0]
+        del self.options[matching_index]
 
 
 @dataclass
@@ -183,6 +187,7 @@ def test_remove_app(fetch_icon, _get_sessions, DisplayIcon, AudioInterface, Mast
     manager.update()
     assert len(manager.audio_apps) == 0
     assert mocked_display_icon.deleted
+    assert mocked_app.options == []
 
 
 @mock.patch("volume_controller.manager.AudioController")
