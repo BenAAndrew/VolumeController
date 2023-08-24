@@ -83,8 +83,10 @@ class Manager:
         self.audio_apps.append(app)
 
     def _delete_app(self, index):
+        matching_app = self.audio_apps[index]
         self.audio_apps[index].delete()
         self.audio_apps.pop(index)
+        self.app.remove_option(matching_app.id)
 
     def _handle_controller_event(self, event: ControlEvent):
         index = event.app_index
