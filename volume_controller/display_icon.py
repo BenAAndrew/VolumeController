@@ -27,4 +27,5 @@ class DisplayIcon:
             self.controller.send_volume(index, self.volume)
 
     def delete(self):
-        self.controller.delete_app(self.index)
+        if self.index:
+            self.controller.delete_app(self.index)
