@@ -117,12 +117,15 @@ class Manager:
 
         if enabled and not matching_app.enabled:
             index = self._get_first_available_index()
-            self.queued_display_task = (matching_app.display.draw_on_screen, index)
+            if index:
+                self.queued_display_task = (matching_app.display.draw_on_screen, index)
+                matching_app.enabled = True
         elif not enabled and matching_app.enabled:
             self.queued_display_task = (matching_app.display.delete, None)
             matching_app.index = None
+            matching_app.enabled = False
 
-        matching_app.enabled = enabled
+        return matching_app.enabled
 
     def update(self):
         sessions = [session for session in self._get_sessions() if session.Process]

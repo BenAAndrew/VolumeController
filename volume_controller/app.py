@@ -21,8 +21,8 @@ class MenuOption:
         self.menu_item = pystray.MenuItem(name, self.on_clicked, checked=lambda item: self.enabled)
 
     def on_clicked(self):
-        self.enabled = not self.enabled
-        self.callback(self.id, self.enabled)
+        enabled = self.callback(self.id, not self.enabled)
+        self.enabled = enabled
 
 
 class Application:
