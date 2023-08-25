@@ -83,7 +83,7 @@ class Manager:
         if enabled:
             display.draw_on_screen(index)
 
-        app = AudioApp(id, name, index, enabled, interface, display)
+        app = AudioApp(id, name, index, True, interface, display)
         self.audio_apps.append(app)
 
     def _delete_app(self, index):
@@ -91,6 +91,19 @@ class Manager:
         self.audio_apps[index].delete()
         self.audio_apps.pop(index)
         self.app.remove_option(matching_app.id)
+
+    def _update_app_positions(self):
+        index = self._get_first_available_index()
+        if index:
+            for a in self.audio_apps:
+                if a.enabled and a.index is None:
+                    a.display.draw_on_screen(index)
+                    a.index = index
+                    a.enabled = True
+                    option = [o for o in self.app.options if o.id == a.id][0]
+                    option.enabled = True
+                    self.app.update_options()
+                    break
 
     def _handle_controller_event(self, event: ControlEvent):
         index = event.app_index
@@ -119,18 +132,19 @@ class Manager:
     def menu_action(self, id, enabled):
         matching_app = next((app for app in self.audio_apps if app.id == id), None)
 
-        if enabled and not matching_app.enabled:
+        if enabled:
             index = self._get_first_available_index()
             if index:
                 self.queued_display_task = (matching_app.display.draw_on_screen, index)
                 matching_app.index = index
                 matching_app.enabled = True
-        elif not enabled and matching_app.enabled:
+                return True
+        else:
             self.queued_display_task = (matching_app.display.delete, None)
             matching_app.index = None
             matching_app.enabled = False
-
-        return matching_app.enabled
+        
+        return False
 
     def update(self):
         sessions = [session for session in self._get_sessions() if session.Process]
@@ -149,6 +163,7 @@ class Manager:
             audio_apps_to_remove = [i for i in range(len(self.audio_apps)) if self.audio_apps[i].id not in session_ids]
             for i in audio_apps_to_remove:
                 self._delete_app(i)
+                self._update_app_positions()
 
         # Menu action
         if self.queued_display_task:
