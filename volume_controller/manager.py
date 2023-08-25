@@ -46,8 +46,9 @@ class Manager:
         self.queued_display_task = None
         self.controller = AudioController()
         self.master_audio = MasterAudioInterface()
+        self.master_icon_image = resource(os.path.join(ASSETS_FOLDER, "icon.png"))
         self.master_icon = DisplayIcon(
-            resource(os.path.join(ASSETS_FOLDER, "icon.png")),
+            self.master_icon_image,
             self.master_audio.get_volume(),
             self.master_audio.is_muted(),
             self.controller,
@@ -70,7 +71,10 @@ class Manager:
 
         index = self._get_first_available_index()
         enabled = index is not None
-        icon_path = fetch_icon(path, name)
+        try:
+            icon_path = fetch_icon(path, name)
+        except:
+            icon_path = self.master_icon_image
         interface = AudioInterface(session)
         volume = interface.get_volume(master_volume)
         is_muted = interface.is_muted()
@@ -119,6 +123,7 @@ class Manager:
             index = self._get_first_available_index()
             if index:
                 self.queued_display_task = (matching_app.display.draw_on_screen, index)
+                matching_app.index = index
                 matching_app.enabled = True
         elif not enabled and matching_app.enabled:
             self.queued_display_task = (matching_app.display.delete, None)
