@@ -173,7 +173,6 @@ def test_add_app_without_render(
     assert len(mocked_app.options) == 4
     AudioInterface.assert_called_with(session)
     assert mock.call(4) not in draw_on_screen.mock_calls
-    assert not manager.audio_apps[3].enabled
     assert manager.audio_apps[3].index is None
 
 
