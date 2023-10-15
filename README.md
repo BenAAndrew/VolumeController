@@ -1,4 +1,4 @@
-# VolumeController
+# Volume Controller
 
 ![](preview.png)
 
@@ -24,5 +24,4 @@ A physical multi-app volume controller. Control master volume and up to 3 other 
 
 If this is done correctly the volume controller should now be working.
 
-## Assembly
-Coming Soon
+## [Assembly](assembly/Assembly.md)
