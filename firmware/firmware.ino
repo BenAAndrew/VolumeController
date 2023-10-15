@@ -21,7 +21,7 @@ uint8_t g;
 uint8_t b;
 
 // Encoders
-#define numEncoders 1
+#define numEncoders 4
 #define stepSize 2
 #define pushDuration 10000
 
@@ -29,8 +29,23 @@ uint8_t b;
 #define encoder1B 24
 #define encoder1Btn 22
 
+#define encoder2A 32
+#define encoder2B 30
+#define encoder2Btn 28
+
+#define encoder3A 38
+#define encoder3B 36
+#define encoder3Btn 34
+
+#define encoder4A 44
+#define encoder4B 42
+#define encoder4Btn 40
+
 Rotary_Encoder encoders[] = {
-  Rotary_Encoder(encoder1A, encoder1B, encoder1Btn, digitalRead(encoder1A))
+  Rotary_Encoder(encoder1A, encoder1B, encoder1Btn, digitalRead(encoder1A)),
+  Rotary_Encoder(encoder2A, encoder2B, encoder2Btn, digitalRead(encoder2A)),
+  Rotary_Encoder(encoder3A, encoder3B, encoder3Btn, digitalRead(encoder3A)),
+  Rotary_Encoder(encoder4A, encoder4B, encoder4Btn, digitalRead(encoder4A)),
 };
 
 // Variables
@@ -50,6 +65,18 @@ void setup() {
   pinMode(encoder1A, INPUT);
   pinMode(encoder1B, INPUT);
   pinMode(encoder1Btn, INPUT_PULLUP);
+
+  pinMode(encoder2A, INPUT);
+  pinMode(encoder2B, INPUT);
+  pinMode(encoder2Btn, INPUT_PULLUP);
+  
+  pinMode(encoder3A, INPUT);
+  pinMode(encoder3B, INPUT);
+  pinMode(encoder3Btn, INPUT_PULLUP);
+
+  pinMode(encoder4A, INPUT);
+  pinMode(encoder4B, INPUT);
+  pinMode(encoder4Btn, INPUT_PULLUP);
   
   Serial.begin(14400);
 }
@@ -79,7 +106,7 @@ void checkEncoders(){
   for(uint8_t i = 0; i < numEncoders; i++){
     output = encoders[i].update(digitalRead(encoders[i].pinA), digitalRead(encoders[i].pinB), digitalRead(encoders[i].pinBtn));
     if(output != 0)
-      Serial.write(output);
+      Serial.write(output + (i * 10));
   }
 }
 

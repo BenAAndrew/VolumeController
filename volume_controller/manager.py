@@ -107,12 +107,13 @@ class Manager:
 
     def _handle_controller_event(self, event: ControlEvent):
         index = event.app_index
-        interface = self.master_audio if index == 0 else self.audio_apps[index - 1].interface
-        if event.event_type == ControlEventType.VOLUME_UP or event.event_type == ControlEventType.VOLUME_DOWN:
-            volume_change = VOLUME_STEP if event.event_type == ControlEventType.VOLUME_UP else -VOLUME_STEP
-            interface.change_volume(volume_change)
-        elif event.event_type == ControlEventType.TOGGLE_MUTE:
-            interface.toggle_mute()
+        if index <= len(self.audio_apps):
+            interface = self.master_audio if index == 0 else self.audio_apps[index - 1].interface
+            if event.event_type == ControlEventType.VOLUME_UP or event.event_type == ControlEventType.VOLUME_DOWN:
+                volume_change = VOLUME_STEP if event.event_type == ControlEventType.VOLUME_UP else -VOLUME_STEP
+                interface.change_volume(volume_change)
+            elif event.event_type == ControlEventType.TOGGLE_MUTE:
+                interface.toggle_mute()
 
     def _get_sessions(self):
         from pycaw.pycaw import AudioUtilities
