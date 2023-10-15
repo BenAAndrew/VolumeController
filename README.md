@@ -1,6 +1,8 @@
 # VolumeController
 
-A physical multi-app volume controller
+![](preview.png)
+
+A physical multi-app volume controller. Control master volume and up to 3 other apps.
 
 # Setup
 
