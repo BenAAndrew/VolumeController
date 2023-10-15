@@ -28,14 +28,14 @@ class AudioInterface:
 
     def change_volume(self, change):
         new_volume = self.get_volume_percentage() + change
-        if new_volume >= 0 and new_volume <= 1:
-            self._set_volume(new_volume)
+        new_volume = max(0, min(1, new_volume))
+        self._set_volume(new_volume)
 
     def is_muted(self) -> bool:
         return self.interface.GetMute() == 1
 
-    def set_muted(self, is_muted):
-        self.interface.SetMute(1 if is_muted else 0, None)
+    def toggle_mute(self):
+        self.interface.SetMute(1 if not self.is_muted() else 0, None)
 
 
 class MasterAudioInterface(AudioInterface):
