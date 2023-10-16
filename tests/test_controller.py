@@ -25,6 +25,7 @@ def test_volume_down(sleep, Serial):
     Serial.return_value = MockedSerial(1)
 
     controller = AudioController()
+    controller.connect()
     event = controller.poll()
     assert event.event_type == ControlEventType.VOLUME_DOWN
     assert event.app_index == 0
@@ -36,6 +37,7 @@ def test_volume_up(sleep, Serial):
     Serial.return_value = MockedSerial(2)
 
     controller = AudioController()
+    controller.connect()
     event = controller.poll()
     assert event.event_type == ControlEventType.VOLUME_UP
     assert event.app_index == 0
@@ -47,6 +49,7 @@ def test_mute(sleep, Serial):
     Serial.return_value = MockedSerial(3)
 
     controller = AudioController()
+    controller.connect()
     event = controller.poll()
     assert event.event_type == ControlEventType.TOGGLE_MUTE
     assert event.app_index == 0
@@ -58,6 +61,7 @@ def test_different_app(sleep, Serial):
     Serial.return_value = MockedSerial(11)
 
     controller = AudioController()
+    controller.connect()
     event = controller.poll()
     assert event.event_type == ControlEventType.VOLUME_DOWN
     assert event.app_index == 1
@@ -70,6 +74,7 @@ def test_send_icon(sleep, Serial):
     Serial.return_value = mocked_serial
 
     controller = AudioController()
+    controller.connect()
     position = 0
     total_colours = 32
     controller.send_icon(position, os.path.join("assets", "icon.png"))

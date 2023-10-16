@@ -1,6 +1,7 @@
 import os
 from typing import Any, List, Optional, Tuple
 import psutil
+from serial.serialutil import SerialException
 from volume_controller.app import Application
 
 from volume_controller.audio_interface import AudioSession, AudioInterface, MasterAudioInterface
@@ -42,7 +43,6 @@ class Manager:
 
     def __init__(self, app: Application):
         self.app = app
-        self.audio_apps = []
         self.queued_display_task = None
         self.controller = AudioController()
         self.master_audio = MasterAudioInterface()
@@ -53,6 +53,11 @@ class Manager:
             self.master_audio.is_muted(),
             self.controller,
         )
+        self.setup()
+
+    def setup(self):
+        self.audio_apps = []
+        self.controller.initialize()
         self.master_icon.draw_on_screen(0)
 
     def _get_first_available_index(self):
@@ -176,9 +181,12 @@ class Manager:
             self.queued_display_task = None
 
         # Controller events
-        event = self.controller.poll()
-        if event:
-            self._handle_controller_event(event)
+        try:
+            event = self.controller.poll()
+            if event:
+                self._handle_controller_event(event)
+        except SerialException:
+            self.setup()
 
         # Audio change events
         is_muted = self.master_audio.is_muted()

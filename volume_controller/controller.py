@@ -23,15 +23,20 @@ class ControlEvent:
 class AudioController:
     serial = None
 
-    def __init__(self):
+    def connect(self):
         for i in range(2, 10):
             try:
                 self.serial = serial.Serial(f"COM{i}", BAUDRATE, timeout=TIMEOUT)
                 time.sleep(5)
-                break
+                return True
             except:
                 pass
-        assert self.serial, "Could not connect"
+        return False
+
+    def initialize(self):
+        connected = False
+        while not connected:
+            connected = self.connect()
 
     def wait_for_success(func):
         def wrapper(*args, **kwargs):

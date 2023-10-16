@@ -37,6 +37,9 @@ class MockedApp:
 class MockedAudioController:
     event: Optional[ControlEvent]
 
+    def initialize(self):
+        pass
+
     def poll(self):
         return self.event
 
